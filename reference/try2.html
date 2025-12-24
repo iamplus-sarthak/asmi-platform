@@ -1,0 +1,694 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AsmiCare OS | Expert Medical Admissions</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500&display=swap"
+        rel="stylesheet">
+    <style>
+        :root {
+            --indigo-primary: #4f46e5;
+            --emerald-accent: #10b981;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc;
+            color: #1e293b;
+        }
+
+        .mono {
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .sidebar-active {
+            background-color: #eef2ff;
+            color: #4338ca;
+            border-right: 3px solid #4338ca;
+        }
+
+        .custom-scroll::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        .custom-scroll::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .custom-scroll::-webkit-scrollbar-thumb {
+            background: #e2e8f0;
+            border-radius: 10px;
+        }
+
+        .view-section {
+            display: none;
+        }
+
+        .view-section.active {
+            display: block;
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(5px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .data-table-row:hover {
+            background-color: #f1f5f9;
+            border-left: 2px solid var(--indigo-primary);
+        }
+    </style>
+</head>
+
+<body class="flex h-screen overflow-hidden text-[11px]">
+
+    <!-- Sidebar -->
+    <aside class="w-60 bg-white border-r border-slate-200 flex flex-col z-50">
+        <div class="p-4 border-b border-slate-100 flex items-center justify-between">
+            <div class="flex items-center gap-2">
+                <div class="w-6 h-6 bg-indigo-600 rounded flex items-center justify-center text-white shadow-lg">
+                    <i data-lucide="zap" size="14"></i>
+                </div>
+                <span
+                    class="font-bold tracking-tight text-slate-900 uppercase text-[10px] font-mono italic">AsmiCare<span
+                        class="text-indigo-600 font-extrabold not-italic ml-0.5">.OS</span></span>
+            </div>
+            <button id="role-toggle"
+                class="text-[8px] px-1.5 py-0.5 bg-slate-900 text-white rounded font-mono uppercase tracking-tighter hover:bg-slate-700 transition-all">STUDENT</button>
+        </div>
+
+        <nav class="flex-1 px-2 py-6 space-y-0.5 overflow-y-auto custom-scroll" id="nav-container">
+            <!-- Nav items injected via JS -->
+        </nav>
+
+        <div class="p-4 border-t border-slate-100 bg-slate-50/30">
+            <div class="bg-white p-2.5 rounded-xl border border-slate-200 flex items-center gap-2.5 shadow-sm">
+                <div id="user-avatar"
+                    class="w-7 h-7 rounded bg-indigo-100 text-indigo-700 flex items-center justify-center font-bold font-mono text-[9px]">
+                    AS</div>
+                <div class="min-w-0">
+                    <p id="user-name" class="font-bold truncate text-slate-900 text-[10px]">Aman Sharma</p>
+                    <p id="user-sub" class="text-[9px] text-slate-500 font-mono tracking-tighter uppercase">Rank: #3,500
+                    </p>
+                </div>
+            </div>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="flex-1 flex flex-col min-w-0 relative">
+        <!-- Header -->
+        <header
+            class="h-11 border-b border-slate-200 bg-white/80 backdrop-blur-md flex items-center justify-between px-6 sticky top-0 z-40">
+            <div class="flex items-center gap-4">
+                <span class="font-mono text-[8px] text-indigo-600 font-bold tracking-[0.2em] uppercase"
+                    id="breadcrumb">/ASMI/STUDENT/DASHBOARD</span>
+            </div>
+            <div class="flex items-center gap-4">
+                <div
+                    class="hidden md:flex items-center gap-1 bg-emerald-50 text-emerald-700 px-2 py-0.5 rounded border border-emerald-100 text-[9px] font-bold">
+                    <i data-lucide="shield-check" size="10"></i> SYNCED: MCC_FINAL_V2
+                </div>
+                <i data-lucide="bell" size="14"
+                    class="text-slate-400 cursor-pointer hover:text-indigo-600 transition-colors"></i>
+                <div class="h-3.5 w-px bg-slate-200"></div>
+                <i data-lucide="user" size="14" class="text-slate-400 cursor-pointer"></i>
+            </div>
+        </header>
+
+        <!-- Content Area -->
+        <div class="flex-1 overflow-y-auto p-6 scroll-smooth custom-scroll" id="main-content">
+            <!-- Dynamic Sections -->
+        </div>
+    </main>
+
+    <!-- Details Overlay Panel -->
+    <div id="side-panel"
+        class="fixed inset-y-0 right-0 w-full sm:w-[450px] bg-white border-l border-slate-200 z-[60] shadow-2xl translate-x-full transition-transform duration-300 flex flex-col">
+        <!-- Content Injected via JS -->
+    </div>
+
+    <!-- AI Toast Overlay -->
+    <div id="toast" class="fixed bottom-6 right-6 z-[100] hidden animate-bounce">
+        <div
+            class="bg-indigo-900 text-white px-4 py-3 rounded-2xl shadow-2xl flex items-center gap-3 border border-indigo-400">
+            <i data-lucide="sparkles" size="16" class="text-indigo-300"></i>
+            <span id="toast-text" class="text-[11px] font-bold"></span>
+        </div>
+    </div>
+
+    <script>
+        // --- DATA & STATE ---
+        const COLLEGES = [
+            { id: 1, name: "MAMC, Delhi", university: "Delhi University", type: "Govt", aiq_r1: 85, fees: 16200, stipend: 105000, bond: "1yr / 10L", beds: 2400, load: "High", city: "New Delhi" },
+            { id: 2, name: "KGMU, Lucknow", university: "KGMU", type: "Govt", aiq_r1: 1200, fees: 54600, stipend: 92000, bond: "2yr / 20L", beds: 3500, load: "Extreme", city: "Lucknow" },
+            { id: 3, name: "BJMC, Pune", university: "MUHS", type: "Govt", aiq_r1: 2400, fees: 114000, stipend: 65000, bond: "1yr / 10L", beds: 1800, load: "High", city: "Pune" },
+            { id: 4, name: "GMC, Nagpur", university: "MUHS", type: "Govt", aiq_r1: 4500, fees: 108000, stipend: 65000, bond: "1yr / 10L", beds: 1400, load: "Moderate", city: "Nagpur" },
+            { id: 5, name: "VMMC, Delhi", university: "IP University", type: "Govt", aiq_r1: 150, fees: 20000, stipend: 100000, bond: "None", beds: 2100, load: "High", city: "New Delhi" }
+        ];
+
+        let state = {
+            role: 'STUDENT',
+            activeTab: 'dashboard',
+            rank: 3500,
+            searchQuery: '',
+            compareList: [],
+            myChoices: [3, 2],
+            isAiLoading: false
+        };
+
+        const apiKey = ""; // API key injection point
+
+        // --- CORE FUNCTIONS ---
+
+        async function callGemini(prompt) {
+            const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
+            try {
+                const response = await fetch(url, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        contents: [{ parts: [{ text: prompt }] }],
+                        systemInstruction: { parts: [{ text: "You are Asmi AI, a concise medical admission strategist. Provide data-dense, professional advice." }] }
+                    })
+                });
+                const result = await response.json();
+                return result.candidates?.[0]?.content?.parts?.[0]?.text || "Strategy offline. Check connection.";
+            } catch (err) {
+                return "Error: Gemini connection failed. Ensure API access.";
+            }
+        }
+
+        function render() {
+            renderSidebar();
+            renderHeader();
+            renderContent();
+            lucide.createIcons();
+        }
+
+        function renderSidebar() {
+            const nav = document.getElementById('nav-container');
+            const studentTabs = [
+                { id: 'dashboard', icon: 'layout-dashboard', label: 'Command Center' },
+                { id: 'registry', icon: 'database', label: 'Master Registry' },
+                { id: 'mapping', icon: 'arrow-right-left', label: 'Allotment Flow' },
+                { id: 'builder', icon: 'list-ordered', label: 'Choice Architect' },
+                { id: 'compare', icon: 'columns', label: 'Compare Engine' },
+                { id: 'guides', icon: 'play-circle', label: 'Guidance Hub' }
+            ];
+
+            const adminTabs = [
+                { id: 'dashboard', icon: 'bar-chart-3', label: 'System Analytics' },
+                { id: 'registry', icon: 'database', label: 'Data Management' },
+                { id: 'pipeline', icon: 'database-zap', label: 'Data Ingestion' },
+                { id: 'franchise', icon: 'briefcase', label: 'Franchise Network' },
+                { id: 'users', icon: 'users', label: 'User Management' }
+            ];
+
+            const tabs = state.role === 'STUDENT' ? studentTabs : adminTabs;
+
+            nav.innerHTML = `
+                <p class="px-3 text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-2">Main Navigation</p>
+                ${tabs.map(tab => `
+                    <button onclick="setActiveTab('${tab.id}')" class="w-full flex items-center gap-3 px-3 py-2 rounded-lg transition-all group ${state.activeTab === tab.id ? 'sidebar-active font-bold' : 'text-slate-500 hover:text-slate-900 hover:bg-slate-50'}">
+                        <i data-lucide="${tab.icon}" size="14" class="${state.activeTab === tab.id ? 'text-indigo-600' : 'text-slate-400 group-hover:text-slate-700'}"></i>
+                        <span class="truncate tracking-tight">${tab.label}</span>
+                    </button>
+                `).join('')}
+            `;
+
+            document.getElementById('user-avatar').innerText = state.role === 'STUDENT' ? 'AS' : 'AD';
+            document.getElementById('user-name').innerText = state.role === 'STUDENT' ? 'Aman Sharma' : 'System_Admin';
+            document.getElementById('user-sub').innerText = state.role === 'STUDENT' ? `Rank: #${state.rank}` : 'LEVEL: ROOT';
+            document.getElementById('role-toggle').innerText = state.role;
+        }
+
+        function renderHeader() {
+            document.getElementById('breadcrumb').innerText = `/ASMI/${state.role}/${state.activeTab.toUpperCase()}`;
+        }
+
+        function renderContent() {
+            const container = document.getElementById('main-content');
+            container.innerHTML = '';
+
+            switch (state.activeTab) {
+                case 'dashboard':
+                    container.innerHTML = state.role === 'STUDENT' ? renderStudentDash() : renderAdminDash();
+                    break;
+                case 'registry':
+                    container.innerHTML = renderRegistry();
+                    break;
+                case 'mapping':
+                    container.innerHTML = renderMapping();
+                    break;
+                case 'builder':
+                    container.innerHTML = renderBuilder();
+                    break;
+                case 'compare':
+                    container.innerHTML = renderCompare();
+                    break;
+                case 'guides':
+                    container.innerHTML = renderGuides();
+                    break;
+                case 'pipeline':
+                    container.innerHTML = renderPipeline();
+                    break;
+                case 'franchise':
+                    container.innerHTML = renderFranchise();
+                    break;
+            }
+        }
+
+        // --- TAB RENDERS ---
+
+        function renderStudentDash() {
+            return `
+                <div class="space-y-6">
+                    <div class="bg-indigo-600 text-white rounded-2xl p-8 relative overflow-hidden shadow-xl shadow-indigo-100">
+                        <h2 class="text-2xl font-bold tracking-tight relative z-10">Counselling Intelligence.</h2>
+                        <p class="text-indigo-100 mt-2 max-w-sm relative z-10 font-medium opacity-90">Rank #${state.rank} analysis complete. Round 1 trends indicate a 12% rise in clinical vacancies for Delhi state quota.</p>
+                        <div class="mt-6 flex gap-3 relative z-10">
+                           <button onclick="setActiveTab('registry')" class="bg-white text-indigo-600 px-5 py-1.5 rounded-lg font-bold uppercase text-[10px] tracking-widest shadow-sm">Explore Map</button>
+                           <button onclick="setActiveTab('builder')" class="bg-indigo-500 text-white border border-indigo-400 px-5 py-1.5 rounded-lg font-bold uppercase text-[10px] tracking-widest">My Preferences</button>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        ${renderStatCard('My Selections', `${state.myChoices.length} Items`, 'Active List', 'indigo')}
+                        ${renderStatCard('Global Nodes', '1,420', 'Institutes Indexed', 'emerald')}
+                        ${renderStatCard('Next Deadline', 'Oct 28', 'R1 Choice Locking', 'rose')}
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderAdminDash() {
+            return `
+                <div class="space-y-6">
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                        ${renderStatCard('Revenue MTD', '₹42.85L', '+12.4% vs LY', 'emerald')}
+                        ${renderStatCard('User Load', '14,289', 'Active Aspirants', 'indigo')}
+                        ${renderStatCard('Data Ingest', '1.4M', 'Rows Verified', 'emerald')}
+                        ${renderStatCard('Node Health', '99.4%', 'System Uptime', 'indigo')}
+                    </div>
+                    <div class="bg-white border border-slate-200 rounded-2xl p-8 text-center border-dashed">
+                        <i data-lucide="bar-chart-3" size="48" class="text-slate-200 mx-auto mb-4"></i>
+                        <h3 class="text-slate-400 font-bold uppercase text-[10px] tracking-widest">Regional heatmap & traffic logs processing...</h3>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderRegistry() {
+            const filtered = COLLEGES.filter(c => c.name.toLowerCase().includes(state.searchQuery.toLowerCase()));
+            return `
+                <div class="space-y-4">
+                    <div class="flex items-center justify-between gap-4 bg-white p-3 rounded-xl border border-slate-200 shadow-sm">
+                        <div class="relative flex-1 max-w-md">
+                            <i data-lucide="search" size="14" class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                            <input oninput="state.searchQuery = this.value; render()" type="text" value="${state.searchQuery}" placeholder="Search database..." class="w-full bg-slate-50 border border-slate-200 rounded-lg px-10 py-1.5 text-[10px] outline-none focus:border-indigo-500 font-medium">
+                        </div>
+                        <div class="flex gap-2">
+                            <span class="text-[9px] font-bold text-slate-400 uppercase mt-1.5 mr-2">Selected for Compare: ${state.compareList.length}/3</span>
+                            <button onclick="setActiveTab('compare')" class="px-4 py-1.5 ${state.compareList.length > 1 ? 'bg-indigo-600 text-white' : 'bg-slate-100 text-slate-400'} rounded-lg text-[9px] font-extrabold uppercase tracking-widest">Run Compare</button>
+                        </div>
+                    </div>
+                    <div class="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm">
+                        <table class="w-full text-left">
+                            <thead class="bg-slate-50 text-slate-400 font-mono text-[9px] uppercase border-b border-slate-200">
+                                <tr>
+                                    <th class="px-6 py-3">Node_Identity</th>
+                                    <th class="px-6 py-3 text-center">R1_Cutoff</th>
+                                    <th class="px-6 py-3 text-center">Fees</th>
+                                    <th class="px-6 py-3 text-center">Stipend</th>
+                                    <th class="px-6 py-3 text-right">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-100 text-[10px]">
+                                ${filtered.map(c => `
+                                    <tr class="data-table-row transition-all group">
+                                        <td class="px-6 py-3">
+                                            <div class="flex items-center gap-3">
+                                                <div class="w-7 h-7 bg-slate-100 border border-slate-200 rounded flex items-center justify-center text-slate-500 font-bold font-mono text-[9px]">${c.id}</div>
+                                                <div class="min-w-0">
+                                                    <p class="font-bold text-slate-900 leading-tight">${c.name}</p>
+                                                    <p class="text-[9px] text-slate-400 font-mono uppercase truncate">${c.city}</p>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td class="px-6 py-3 text-center font-mono text-slate-500 font-bold">#${c.aiq_r1}</td>
+                                        <td class="px-6 py-3 text-center font-mono">₹${(c.fees / 1000).toFixed(0)}k</td>
+                                        <td class="px-6 py-3 text-center font-mono text-emerald-600 font-bold">₹${(c.stipend / 1000).toFixed(0)}k</td>
+                                        <td class="px-6 py-3 text-right">
+                                            <div class="flex justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                <button onclick="inspectCollege(${c.id})" class="p-1.5 hover:bg-white border border-transparent hover:border-slate-200 rounded text-slate-400 hover:text-indigo-600"><i data-lucide="info" size="14"></i></button>
+                                                <button onclick="toggleCompare(${c.id})" class="p-1.5 rounded border ${state.compareList.includes(c.id) ? 'bg-indigo-600 text-white border-indigo-600' : 'bg-white border-slate-200 text-slate-400 hover:text-indigo-600'}"><i data-lucide="plus" size="14" class="${state.compareList.includes(c.id) ? 'rotate-45 transition-all' : ''}"></i></button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderMapping() {
+            return `
+                <div class="space-y-6">
+                    <div class="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
+                        <h2 class="text-xl font-bold text-slate-900 tracking-tight">Allotment Flow Mapping</h2>
+                        <p class="text-[10px] text-slate-500 font-medium mt-1 uppercase tracking-widest">Candidate migration from AIQ to State Quota.</p>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="bg-white border border-slate-200 rounded-2xl overflow-hidden p-6">
+                            <h4 class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-4">Predicted Vacancies (R2)</h4>
+                            <div class="space-y-4">
+                                ${[
+                    { range: "1-1000", vacant: 45, color: "emerald" },
+                    { range: "1001-5000", vacant: 120, color: "indigo" },
+                    { range: "5001-15000", vacant: 480, color: "indigo" }
+                ].map(item => `
+                                    <div class="flex items-center justify-between p-3 bg-slate-50 rounded-xl">
+                                        <span class="font-mono font-bold text-slate-600">RANK ${item.range}</span>
+                                        <span class="text-${item.color}-600 font-extrabold text-sm">+${item.vacant} SEATS</span>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+                        <div class="bg-indigo-900 text-white rounded-2xl p-8 flex flex-col justify-center relative overflow-hidden">
+                           <h4 class="font-bold text-sm mb-4 flex items-center gap-2 text-indigo-200"><i data-lucide="arrow-right-left" size="18"></i> Flow Logic</h4>
+                           <p class="text-[11px] leading-relaxed opacity-90">Our engine tracks candidates holding AIQ Round 1 seats who also appeared in State Merit lists. 14% are predicted to vacate AIQ for home-state Govt seats.</p>
+                           <i data-lucide="layers" size="100" class="absolute bottom-[-20px] right-[-20px] opacity-10"></i>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderBuilder() {
+            const list = state.myChoices.map(id => COLLEGES.find(c => c.id === id)).filter(Boolean);
+            return `
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                    <div class="lg:col-span-2 space-y-4">
+                        <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex items-center justify-between">
+                            <h2 class="text-xl font-bold text-slate-900 tracking-tight">Choice Architect</h2>
+                            <button onclick="runAiAudit()" class="bg-indigo-600 text-white px-5 py-2 rounded-xl text-[10px] font-bold uppercase tracking-widest shadow-lg shadow-indigo-100 flex items-center gap-2">
+                                <i data-lucide="sparkles" size="14"></i> Run AI Strategy
+                            </button>
+                        </div>
+                        <div id="ai-insight-area"></div>
+                        <div class="space-y-2">
+                            ${list.map((c, i) => `
+                                <div class="bg-white border border-slate-200 p-4 rounded-xl flex items-center gap-4 group hover:border-indigo-300 transition-all shadow-sm">
+                                    <i data-lucide="grip-vertical" size="14" class="text-slate-300"></i>
+                                    <span class="w-6 h-6 bg-slate-50 border border-slate-200 rounded text-[10px] font-bold flex items-center justify-center text-slate-500">${i + 1}</span>
+                                    <div class="flex-1 min-w-0">
+                                       <p class="font-bold text-slate-900 truncate">${c.name}</p>
+                                       <p class="text-[9px] text-slate-400 font-mono uppercase tracking-tighter">BOND: ${c.bond.split('/')[0]} • FEES: ₹${(c.fees / 1000).toFixed(0)}k</p>
+                                    </div>
+                                    <button onclick="removeFromChoices(${c.id})" class="p-2 text-slate-300 hover:text-rose-500 transition-colors"><i data-lucide="trash-2" size="16"></i></button>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                    <div class="space-y-6">
+                        <div class="bg-white border border-slate-200 p-6 rounded-2xl shadow-sm space-y-6">
+                            <h4 class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-4">Risk Audit</h4>
+                            <div class="space-y-4">
+                                ${renderRiskItem('Rank Safety', 'Safe', 'Matches last year R1 closing.')}
+                                ${renderRiskItem('Bond Penalty', 'Caution', 'KGMU has 2-year rural bond.')}
+                            </div>
+                            <button class="w-full bg-slate-900 text-white py-3 rounded-xl font-bold uppercase text-[10px] tracking-widest shadow-lg">Lock Choice List</button>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderCompare() {
+            const list = state.compareList.map(id => COLLEGES.find(c => c.id === id)).filter(Boolean);
+            if (list.length === 0) return `<div class="p-20 text-center border-2 border-dashed rounded-3xl"><h3 class="text-slate-300 font-bold uppercase">Compare engine idle. Add nodes from Registry.</h3></div>`;
+            return `
+                <div class="space-y-6">
+                    <h2 class="text-xl font-bold text-slate-900">Side-by-Side Analysis</h2>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        ${list.map(c => `
+                            <div class="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-sm relative">
+                                <button onclick="toggleCompare(${c.id})" class="absolute top-3 right-3 p-1.5 bg-slate-50 text-slate-400 hover:text-rose-500 rounded-full transition-all"><i data-lucide="x" size="14"></i></button>
+                                <div class="p-6 bg-slate-50 border-b border-slate-100">
+                                    <p class="text-[9px] font-bold text-indigo-600 uppercase tracking-widest mb-1">Rank Node #${c.aiq_r1}</p>
+                                    <h3 class="font-bold text-slate-900 text-lg leading-tight">${c.name}</h3>
+                                </div>
+                                <div class="p-6 space-y-6 text-[10px]">
+                                    <div class="space-y-1">
+                                        <p class="text-slate-400 font-bold uppercase text-[8px]">Financials</p>
+                                        <div class="flex justify-between border-b pb-1"><span>Tuition</span><span class="font-bold font-mono">₹${c.fees.toLocaleString()}</span></div>
+                                        <div class="flex justify-between text-emerald-600"><span>Stipend</span><span class="font-bold font-mono">₹${c.stipend.toLocaleString()}</span></div>
+                                    </div>
+                                    <div class="space-y-1">
+                                        <p class="text-slate-400 font-bold uppercase text-[8px]">Legal & Bond</p>
+                                        <p class="p-2 bg-slate-100 rounded-lg font-bold text-slate-700">${c.bond}</p>
+                                    </div>
+                                    <div class="space-y-1">
+                                        <p class="text-slate-400 font-bold uppercase text-[8px]">Clinical Stats</p>
+                                        <div class="flex justify-between"><span>Beds</span><span class="font-bold">${c.beds}</span></div>
+                                        <div class="flex justify-between"><span>OPD Load</span><span class="font-bold">${c.load}</span></div>
+                                    </div>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderGuides() {
+            return `
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                    <div class="lg:col-span-2 space-y-4">
+                        <div class="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm"><h3 class="font-bold text-slate-900 flex items-center gap-2"><i data-lucide="play-circle" size="18" class="text-indigo-600"></i> Expert Strategy Hub</h3></div>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            ${['R1 Strategy: Lock or Float?', 'Bond Matrix: State Guide', 'Predicting R2 Vacancies', 'Safe Choice List Builder'].map(t => `
+                                <div class="bg-white border p-3 rounded-xl flex items-center gap-4 hover:border-indigo-400 cursor-pointer shadow-sm group">
+                                    <div class="w-10 h-10 bg-slate-50 rounded-lg flex items-center justify-center text-slate-300 group-hover:bg-indigo-600 group-hover:text-white transition-all"><i data-lucide="play" size="18"></i></div>
+                                    <div class="min-w-0"><p class="font-bold text-slate-800 text-[11px] truncate">${t}</p><p class="text-[9px] text-slate-500">45:00 • By Dr. Jayesh</p></div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                    <div class="bg-slate-900 text-white rounded-2xl p-6 shadow-xl relative overflow-hidden">
+                        <h4 class="font-bold text-[10px] uppercase tracking-widest text-slate-400 mb-6 flex items-center gap-2"><i data-lucide="library" size="16"></i> Critical PDF Resources</h4>
+                        <div class="space-y-3">
+                            ${['All India R1 Merit List 2024', 'State Bond Penalty Matrix', 'Hostel Fee Master Chart'].map(l => `
+                                <div class="flex items-center justify-between p-3 bg-white/5 border border-white/10 rounded-xl hover:bg-white/10 cursor-pointer transition-all">
+                                    <div class="flex items-center gap-3"><i data-lucide="file-text" size="16" class="text-slate-400"></i><span class="text-[11px] font-medium truncate w-32">${l}</span></div>
+                                    <i data-lucide="download" size="14" class="text-indigo-400"></i>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderPipeline() {
+            return `
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                    <div class="lg:col-span-2 space-y-4">
+                        <div class="bg-white border-2 border-dashed border-slate-200 rounded-2xl p-12 text-center group hover:border-indigo-500/50 transition-all">
+                            <div class="w-12 h-12 bg-indigo-50 text-indigo-600 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform"><i data-lucide="file-up" size="24"></i></div>
+                            <h3 class="font-bold text-slate-900 text-[12px] uppercase tracking-widest mb-1">National Data Ingestion</h3>
+                            <p class="text-slate-500 text-[10px] mb-6">Drop Allotment or Seat Matrix PDF here for AI parsing.</p>
+                            <button class="bg-indigo-600 text-white px-8 py-2.5 rounded-lg font-bold uppercase text-[10px] tracking-widest shadow-lg shadow-indigo-100">Run_Pipeline</button>
+                        </div>
+                    </div>
+                    <div class="bg-indigo-900 text-white rounded-2xl p-6 shadow-xl space-y-6">
+                         <h4 class="font-bold text-[10px] uppercase tracking-widest text-indigo-300">Stateboard Sync Status</h4>
+                         ${renderSyncItem('MCC National', '100%')}
+                         ${renderSyncItem('Maharashtra', '84%')}
+                         ${renderSyncItem('Uttar Pradesh', '12%')}
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderFranchise() {
+            return `
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    ${['Delhi North Hub', 'Pune Central Hub', 'Lucknow East Hub'].map((h, i) => `
+                        <div class="bg-white border border-slate-200 p-5 rounded-2xl hover:border-indigo-400 transition-all cursor-pointer shadow-sm group">
+                            <div class="flex justify-between items-start mb-4">
+                                <div class="w-8 h-8 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center text-[10px] group-hover:bg-indigo-600 group-hover:text-white transition-colors font-bold">${i + 1}</div>
+                                <span class="px-2 py-0.5 rounded-full text-[9px] font-bold uppercase bg-emerald-50 text-emerald-700">Active</span>
+                            </div>
+                            <h4 class="font-bold text-slate-900 text-[12px]">${h}</h4>
+                            <p class="text-[10px] text-slate-500 mt-1">Managed Hub Node</p>
+                            <div class="mt-6 flex justify-between border-t border-slate-100 pt-4">
+                                 <div><p class="text-[9px] text-slate-400 uppercase font-bold">Users</p><p class="font-bold text-slate-900">${(Math.random() * 2000).toFixed(0)}</p></div>
+                                 <div class="text-right"><p class="text-[9px] text-slate-400 uppercase font-bold">Revenue</p><p class="font-bold text-emerald-600">₹${(Math.random() * 20).toFixed(1)}L</p></div>
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+        }
+
+        // --- UI HELPERS ---
+
+        function renderStatCard(label, value, sub, accent) {
+            const colors = { indigo: 'text-indigo-600', emerald: 'text-emerald-600', rose: 'text-rose-600' };
+            return `
+                <div class="bg-white border border-slate-200 p-4 rounded-xl shadow-sm hover:border-slate-300 transition-all">
+                   <p class="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-1">${label}</p>
+                   <div class="flex items-baseline gap-2">
+                      <p class="text-lg font-bold tracking-tight ${colors[accent]}">${value}</p>
+                      <p class="text-[9px] text-slate-500 truncate">${sub}</p>
+                   </div>
+                </div>
+            `;
+        }
+
+        function renderRiskItem(label, status, desc) {
+            return `
+                <div class="flex gap-3">
+                    <i data-lucide="${status === 'Safe' ? 'check-circle-2' : 'alert-triangle'}" size="16" class="${status === 'Safe' ? 'text-emerald-500' : 'text-amber-500'} shrink-0"></i>
+                    <div><p class="text-[10px] font-bold text-slate-900 uppercase">${label}</p><p class="text-[10px] text-slate-500">${desc}</p></div>
+                </div>
+            `;
+        }
+
+        function renderSyncItem(label, val) {
+            return `<div class="space-y-1"><div class="flex justify-between text-[9px] font-bold uppercase"><span>${label}</span><span>${val}</span></div><div class="h-1 bg-white/10 rounded-full overflow-hidden"><div class="h-full bg-indigo-400 transition-all" style="width: ${val}"></div></div></div>`;
+        }
+
+        // --- INTERACTIONS ---
+
+        function setActiveTab(id) {
+            state.activeTab = id;
+            render();
+        }
+
+        function toggleRole() {
+            state.role = state.role === 'STUDENT' ? 'ADMIN' : 'STUDENT';
+            state.activeTab = 'dashboard';
+            render();
+        }
+
+        function toggleCompare(id) {
+            if (state.compareList.includes(id)) {
+                state.compareList = state.compareList.filter(x => x !== id);
+            } else if (state.compareList.length < 3) {
+                state.compareList.push(id);
+            }
+            render();
+        }
+
+        function removeFromChoices(id) {
+            state.myChoices = state.myChoices.filter(x => x !== id);
+            render();
+        }
+
+        async function runAiAudit() {
+            const area = document.getElementById('ai-insight-area');
+            area.innerHTML = `
+                <div class="bg-indigo-600 text-white rounded-2xl p-6 shadow-xl animate-pulse">
+                    <p class="text-[11px] font-bold">✨ ASMI is auditing your preferences against national trends...</p>
+                </div>
+            `;
+
+            const listNames = state.myChoices.map(id => COLLEGES.find(c => c.id === id)?.name).join(", ");
+            const prompt = `Rank: ${state.rank}. Category: OBC. Preferences: ${listNames}. Assessment the risk ofRound 1 allotment and give 3 precise strategy bullets.`;
+
+            const response = await callGemini(prompt);
+
+            area.innerHTML = `
+                <div class="bg-indigo-600 text-white rounded-2xl p-6 shadow-xl animate-in slide-in-from-top-4 relative overflow-hidden">
+                    <div class="relative z-10">
+                        <div class="flex items-center gap-2 mb-3">
+                            <i data-lucide="sparkles" size="16" class="text-indigo-200"></i>
+                            <h4 class="font-bold text-[10px] uppercase tracking-widest text-indigo-100">AI Intelligence Strategic Audit</h4>
+                        </div>
+                        <div class="text-[11px] leading-relaxed space-y-2 opacity-95">
+                            ${response.split('\n').map(l => `<p>${l}</p>`).join('')}
+                        </div>
+                        <button onclick="this.parentElement.parentElement.remove()" class="mt-4 text-[9px] font-bold uppercase text-indigo-300 hover:text-white underline">Dismiss</button>
+                    </div>
+                    <i data-lucide="sparkles" size="120" class="absolute right-[-20px] bottom-[-20px] opacity-10"></i>
+                </div>
+            `;
+            lucide.createIcons();
+        }
+
+        function inspectCollege(id) {
+            const c = COLLEGES.find(x => x.id === id);
+            const panel = document.getElementById('side-panel');
+            panel.innerHTML = `
+                <div class="p-6 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
+                    <div><p class="text-[9px] font-bold text-indigo-600 uppercase tracking-widest mb-1">Node_Profile</p><h3 class="text-lg font-bold text-slate-900">${c.name}</h3></div>
+                    <button onclick="closePanel()" class="p-2 text-slate-400 hover:text-rose-500 rounded-full transition-all"><i data-lucide="x" size="18"></i></button>
+                </div>
+                <div class="flex-1 overflow-y-auto p-6 space-y-8">
+                    <div class="grid grid-cols-2 gap-3">
+                        <div class="p-3 bg-white border rounded-lg"><span class="text-[9px] font-bold text-slate-400 uppercase block mb-1">University</span><p class="text-[10px] font-bold">${c.university}</p></div>
+                        <div class="p-3 bg-white border rounded-lg"><span class="text-[9px] font-bold text-slate-400 uppercase block mb-1">State</span><p class="text-[10px] font-bold">${c.city}, ${c.state}</p></div>
+                        <div class="p-3 bg-white border rounded-lg"><span class="text-[9px] font-bold text-slate-400 uppercase block mb-1">Capacity</span><p class="text-[10px] font-bold">${c.beds} BEDS</p></div>
+                        <div class="p-3 bg-white border rounded-lg"><span class="text-[9px] font-bold text-slate-400 uppercase block mb-1">Load</span><p class="text-[10px] font-bold">${c.load}</p></div>
+                    </div>
+                    <div class="bg-slate-50 border border-slate-200 rounded-xl p-4 space-y-3">
+                        <h4 class="text-[10px] font-bold text-slate-400 uppercase mb-2">Pricing_Matrix</h4>
+                        <div class="flex justify-between"><span>Annual Tuition</span><span class="font-mono font-bold">₹${c.fees.toLocaleString()}</span></div>
+                        <div class="flex justify-between text-indigo-600"><span>Monthly Stipend</span><span class="font-mono font-bold">₹${c.stipend.toLocaleString()}</span></div>
+                    </div>
+                </div>
+                <div class="p-6 border-t bg-slate-50/50 flex gap-3">
+                    <button class="flex-1 bg-white border border-slate-200 py-2.5 rounded-xl font-bold uppercase text-[10px]">Brochure</button>
+                    <button onclick="addFromPanel(${c.id})" class="flex-1 bg-indigo-600 text-white py-2.5 rounded-xl font-bold uppercase text-[10px] shadow-lg shadow-indigo-100">Add Preference</button>
+                </div>
+            `;
+            panel.classList.remove('translate-x-full');
+            lucide.createIcons();
+        }
+
+        function closePanel() {
+            document.getElementById('side-panel').classList.add('translate-x-full');
+        }
+
+        function addFromPanel(id) {
+            if (!state.myChoices.includes(id)) {
+                state.myChoices.push(id);
+                showToast("Added to choice list");
+            }
+            closePanel();
+            render();
+        }
+
+        function showToast(text) {
+            const toast = document.getElementById('toast');
+            document.getElementById('toast-text').innerText = text;
+            toast.classList.remove('hidden');
+            setTimeout(() => toast.classList.add('hidden'), 3000);
+            lucide.createIcons();
+        }
+
+        // --- INIT ---
+        document.getElementById('role-toggle').addEventListener('click', toggleRole);
+        window.onload = render;
+
+    </script>
+</body>
+
+</html>

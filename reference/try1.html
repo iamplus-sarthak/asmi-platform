@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Zynerd | Admin OS</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+
+        :root {
+            --bg-main: #0a0a0a;
+            --bg-card: #141414;
+            --border: #262626;
+            --accent: #10b981;
+            /* Devin Emerald */
+            --text-muted: #a3a3a3;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-main);
+            color: #ffffff;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .mono {
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--bg-main);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--border);
+            border-radius: 10px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #404040;
+        }
+
+        .sidebar-link.active {
+            background-color: #1a1a1a;
+            color: var(--accent);
+            border-left: 2px solid var(--accent);
+        }
+
+        .view-section {
+            display: none;
+        }
+
+        .view-section.active {
+            display: block;
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(4px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .terminal-glow {
+            box-shadow: 0 0 20px rgba(16, 185, 129, 0.05);
+        }
+
+        /* Responsive Sidebar */
+        @media (max-width: 1024px) {
+            .sidebar-collapsed {
+                transform: translateX(-100%);
+            }
+
+            .sidebar-open {
+                transform: translateX(0);
+            }
+        }
+    </style>
+</head>
+
+<body class="flex h-screen overflow-hidden text-[13px]">
+
+    <!-- Overlay for mobile sidebar -->
+    <div id="sidebar-overlay" onclick="toggleSidebar()" class="fixed inset-0 bg-black/60 z-40 hidden lg:hidden"></div>
+
+    <!-- Sidebar -->
+    <aside id="sidebar"
+        class="fixed lg:relative w-64 h-full bg-[#0d0d0d] border-r border-[#262626] flex flex-col z-50 transition-transform duration-300 sidebar-collapsed lg:translate-x-0">
+        <div class="p-5 flex items-center justify-between">
+            <div class="flex items-center gap-2.5">
+                <div class="w-7 h-7 bg-emerald-500 rounded flex items-center justify-center text-black">
+                    <i class="fa-solid fa-bolt-lightning text-sm"></i>
+                </div>
+                <span class="font-semibold text-sm tracking-tight mono uppercase">Zynerd.os</span>
+            </div>
+            <button onclick="toggleSidebar()" class="lg:hidden text-muted-400">
+                <i class="fa-solid fa-xmark text-lg"></i>
+            </button>
+        </div>
+
+        <nav class="flex-1 px-3 py-4 space-y-0.5 overflow-y-auto">
+            <div class="px-3 mb-2 text-[10px] font-bold text-[#525252] uppercase tracking-[0.2em]">Navigation</div>
+            <button onclick="switchView('overview')"
+                class="sidebar-link active w-full flex items-center gap-3 px-3 py-2 rounded text-[#a3a3a3] transition-all hover:text-white hover:bg-[#1a1a1a]">
+                <i class="fa-solid fa-terminal w-4"></i> Overview
+            </button>
+            <button onclick="switchView('autoloader')"
+                class="sidebar-link w-full flex items-center gap-3 px-3 py-2 rounded text-[#a3a3a3] transition-all hover:text-white hover:bg-[#1a1a1a]">
+                <i class="fa-solid fa-file-code w-4"></i> PDF Parser
+            </button>
+            <button onclick="switchView('colleges')"
+                class="sidebar-link w-full flex items-center gap-3 px-3 py-2 rounded text-[#a3a3a3] transition-all hover:text-white hover:bg-[#1a1a1a]">
+                <i class="fa-solid fa-database w-4"></i> Institutes
+            </button>
+            <button onclick="switchView('franchises')"
+                class="sidebar-link w-full flex items-center gap-3 px-3 py-2 rounded text-[#a3a3a3] transition-all hover:text-white hover:bg-[#1a1a1a]">
+                <i class="fa-solid fa-network-wired w-4"></i> Franchises
+            </button>
+            <button onclick="switchView('subscriptions')"
+                class="sidebar-link w-full flex items-center gap-3 px-3 py-2 rounded text-[#a3a3a3] transition-all hover:text-white hover:bg-[#1a1a1a]">
+                <i class="fa-solid fa-credit-card w-4"></i> Analytics
+            </button>
+        </nav>
+
+        <div class="p-4 border-t border-[#262626]">
+            <div class="bg-[#141414] rounded p-3 flex items-center gap-3 border border-[#262626]">
+                <div
+                    class="w-8 h-8 rounded bg-emerald-500/10 flex items-center justify-center text-emerald-500 font-bold mono text-xs">
+                    SA</div>
+                <div class="min-w-0">
+                    <p class="text-xs font-medium truncate">root_admin</p>
+                    <p class="text-[10px] text-[#525252] truncate">192.168.1.1</p>
+                </div>
+            </div>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="flex-1 flex flex-col min-w-0 bg-[#0a0a0a] overflow-hidden">
+        <!-- Header -->
+        <header
+            class="h-14 bg-[#0a0a0a] border-b border-[#262626] px-4 lg:px-8 flex items-center justify-between sticky top-0 z-40">
+            <div class="flex items-center gap-4">
+                <button onclick="toggleSidebar()" class="lg:hidden p-2 -ml-2 text-white">
+                    <i class="fa-solid fa-bars-staggered"></i>
+                </button>
+                <h1 id="view-title" class="text-xs font-bold mono text-emerald-500 uppercase tracking-widest">
+                    /root/overview</h1>
+            </div>
+            <div class="flex items-center gap-3">
+                <div class="hidden md:flex relative">
+                    <input type="text" placeholder="CMD + K to search..."
+                        class="bg-[#141414] border border-[#262626] rounded px-3 py-1.5 text-[11px] w-48 focus:outline-none focus:border-emerald-500 transition-all placeholder-[#404040]">
+                </div>
+                <button
+                    class="w-8 h-8 flex items-center justify-center text-[#525252] hover:text-white transition-colors">
+                    <i class="fa-solid fa-bell text-sm"></i>
+                </button>
+            </div>
+        </header>
+
+        <!-- Scrollable Area -->
+        <div class="flex-1 overflow-y-auto p-4 lg:p-8">
+
+            <!-- Overview -->
+            <section id="overview" class="view-section active space-y-6">
+                <!-- Metrics -->
+                <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                    <div class="bg-[#141414] p-4 rounded border border-[#262626]">
+                        <p class="text-[10px] font-bold text-[#525252] uppercase tracking-wider">Aspirants</p>
+                        <p class="text-xl font-bold mt-1 tracking-tight">14.2k <span
+                                class="text-emerald-500 text-[10px] font-normal">+12%</span></p>
+                    </div>
+                    <div class="bg-[#141414] p-4 rounded border border-[#262626]">
+                        <p class="text-[10px] font-bold text-[#525252] uppercase tracking-wider">Revenue MTD</p>
+                        <p class="text-xl font-bold mt-1 tracking-tight">₹42.8L <span
+                                class="text-emerald-500 text-[10px] font-normal">↑8%</span></p>
+                    </div>
+                    <div class="bg-[#141414] p-4 rounded border border-[#262626]">
+                        <p class="text-[10px] font-bold text-[#525252] uppercase tracking-wider">Parser Status</p>
+                        <p class="text-xl font-bold mt-1 text-emerald-500 mono">READY</p>
+                    </div>
+                    <div class="bg-[#141414] p-4 rounded border border-[#262626]">
+                        <p class="text-[10px] font-bold text-[#525252] uppercase tracking-wider">Nodes Live</p>
+                        <p class="text-xl font-bold mt-1 tracking-tight">54 Hubs</p>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 xl:grid-cols-3 gap-6">
+                    <div class="xl:col-span-2 space-y-6">
+                        <!-- Feed -->
+                        <div class="bg-[#141414] rounded border border-[#262626] overflow-hidden">
+                            <div
+                                class="px-4 py-3 border-b border-[#262626] bg-[#1a1a1a] flex justify-between items-center">
+                                <span class="font-bold mono text-[10px] uppercase tracking-widest text-[#a3a3a3]">System
+                                    Activity Logs</span>
+                                <span class="text-[10px] text-emerald-500 mono flex items-center gap-1.5"><span
+                                        class="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse"></span>
+                                    LIVE_FEED</span>
+                            </div>
+                            <div class="p-4 space-y-4">
+                                <div class="flex gap-4 items-start group">
+                                    <div class="mt-1 text-emerald-500"><i class="fa-solid fa-code-merge"></i></div>
+                                    <div>
+                                        <p class="font-medium text-white">UP Merit List Detection</p>
+                                        <p class="text-[#737373] mt-0.5 leading-relaxed">System detected new PDF release
+                                            for Uttar Pradesh Round 1. Initial scan: 4,500 candidate records.</p>
+                                        <div class="mt-2 flex gap-2">
+                                            <button
+                                                class="px-2 py-1 bg-emerald-500/10 text-emerald-500 rounded text-[10px] font-bold border border-emerald-500/20 hover:bg-emerald-500/20 transition-all">EXECUTE_PARSER</button>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="flex gap-4 items-start border-t border-[#262626] pt-4 opacity-70">
+                                    <div class="mt-1 text-blue-400"><i class="fa-solid fa-shield-check"></i></div>
+                                    <div>
+                                        <p class="font-medium text-white">MCC AIQ Sync Completed</p>
+                                        <p class="text-[#737373] mt-0.5">Seat Matrix v2.4 synced globally across all 54
+                                            nodes.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Top Institutes -->
+                    <div class="bg-[#141414] rounded border border-[#262626] flex flex-col">
+                        <div class="px-4 py-3 border-b border-[#262626] bg-[#1a1a1a]">
+                            <span class="font-bold mono text-[10px] uppercase tracking-widest text-[#a3a3a3]">Interest
+                                Heatmap</span>
+                        </div>
+                        <div class="p-4 space-y-5 flex-1">
+                            <div>
+                                <div class="flex justify-between text-[11px] mb-1.5 font-medium">
+                                    <span>MAMC, Delhi</span>
+                                    <span class="text-[#737373]">88% Interest</span>
+                                </div>
+                                <div class="w-full bg-[#262626] h-1 rounded-full overflow-hidden">
+                                    <div class="bg-emerald-500 h-full w-[88%]"></div>
+                                </div>
+                            </div>
+                            <div>
+                                <div class="flex justify-between text-[11px] mb-1.5 font-medium">
+                                    <span>KGMU, Lucknow</span>
+                                    <span class="text-[#737373]">72% Interest</span>
+                                </div>
+                                <div class="w-full bg-[#262626] h-1 rounded-full overflow-hidden">
+                                    <div class="bg-blue-400 h-full w-[72%]"></div>
+                                </div>
+                            </div>
+                            <div class="pt-4 border-t border-[#262626] mt-4">
+                                <p class="text-[10px] text-[#525252] leading-relaxed">Aggregated from choice lists of
+                                    14,289 active aspirants over the last 24h.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- PDF Parser Section -->
+            <section id="autoloader" class="view-section space-y-6">
+                <div class="bg-[#141414] border border-[#262626] p-6 lg:p-10 rounded-lg text-center terminal-glow">
+                    <div
+                        class="w-16 h-16 bg-emerald-500/10 text-emerald-500 rounded-full flex items-center justify-center mx-auto mb-6 border border-emerald-500/20">
+                        <i class="fa-solid fa-file-pdf text-2xl"></i>
+                    </div>
+                    <h2 class="text-lg font-bold mono uppercase tracking-widest mb-2">Initialize Data Ingestion</h2>
+                    <p class="text-[#737373] max-w-lg mx-auto mb-8">Upload official seat matrix or allotment PDFs. Our
+                        LLM-powered engine will structure the data with 99.9% accuracy.</p>
+                    <button onclick="simulateUpload()"
+                        class="px-8 py-3 bg-emerald-500 text-black font-bold rounded hover:bg-emerald-400 transition-all shadow-lg shadow-emerald-500/20 mono text-xs uppercase">
+                        $ upload_source_pdf
+                    </button>
+                </div>
+
+                <!-- Table -->
+                <div class="bg-[#141414] rounded border border-[#262626] overflow-x-auto">
+                    <table class="w-full text-left min-w-[600px]">
+                        <thead
+                            class="bg-[#1a1a1a] text-[#525252] text-[10px] uppercase font-bold tracking-widest border-b border-[#262626]">
+                            <tr>
+                                <th class="px-6 py-3">Source_Node</th>
+                                <th class="px-6 py-3">Records</th>
+                                <th class="px-6 py-3">Status</th>
+                                <th class="px-6 py-3">Timestamp</th>
+                                <th class="px-6 py-3">Control</th>
+                            </tr>
+                        </thead>
+                        <tbody id="file-list" class="divide-y divide-[#262626] text-[11px]">
+                            <tr id="upload-row" class="hidden bg-emerald-500/5 border-emerald-500/20">
+                                <td class="px-6 py-4 font-medium text-emerald-500 mono tracking-tight">
+                                    UP_MERIT_LIST_R1.pdf</td>
+                                <td class="px-6 py-4" id="rows-parsed">SCANNING...</td>
+                                <td class="px-6 py-4">
+                                    <div class="w-24 bg-[#262626] h-1 rounded-full overflow-hidden">
+                                        <div id="upload-progress" class="bg-emerald-500 h-full" style="width: 0%"></div>
+                                    </div>
+                                </td>
+                                <td class="px-6 py-4 text-[#525252] mono">RUNNING_PROC</td>
+                                <td class="px-6 py-4">
+                                    <button class="text-red-500 uppercase font-bold text-[9px]">abort</button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="px-6 py-4 font-medium mono">MCC_AIQ_R1_2024.pdf</td>
+                                <td class="px-6 py-4">18,452</td>
+                                <td class="px-6 py-4 text-emerald-500 font-bold uppercase tracking-widest text-[9px]">
+                                    Production_Live</td>
+                                <td class="px-6 py-4 text-[#525252] mono">2024-10-12 14:20</td>
+                                <td class="px-6 py-4 flex gap-4">
+                                    <button class="text-[#a3a3a3] hover:text-white transition-colors"><i
+                                            class="fa-solid fa-code"></i></button>
+                                    <button class="text-[#a3a3a3] hover:text-white transition-colors"><i
+                                            class="fa-solid fa-download"></i></button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- Colleges Section -->
+            <section id="colleges" class="view-section space-y-6 text-center py-20">
+                <div class="text-[#262626] mb-4"><i class="fa-solid fa-database text-6xl"></i></div>
+                <h3 class="font-bold text-sm mono uppercase tracking-widest text-white">Database Initialization In
+                    Progress</h3>
+                <p class="text-[#737373] max-w-sm mx-auto mt-2">Integrating All India seat matrices and fee structures.
+                    Estimated completion: T-48h.</p>
+            </section>
+
+            <!-- Franchises Section -->
+            <section id="franchises" class="view-section space-y-6">
+                <div class="flex items-center justify-between mb-2">
+                    <h2 class="text-xs font-bold mono uppercase tracking-widest text-emerald-500">Franchise_Nodes (54)
+                    </h2>
+                    <button
+                        class="px-3 py-1.5 bg-[#141414] border border-[#262626] rounded text-[10px] font-bold hover:bg-[#1a1a1a] transition-all uppercase tracking-tighter">Register
+                        Center</button>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <div
+                        class="bg-[#141414] p-5 rounded border border-[#262626] hover:border-emerald-500/50 transition-all cursor-pointer">
+                        <div class="flex items-center justify-between mb-4">
+                            <span
+                                class="w-8 h-8 rounded bg-emerald-500/10 text-emerald-500 flex items-center justify-center font-bold mono text-[10px]">DL</span>
+                            <span
+                                class="text-[9px] font-bold px-1.5 py-0.5 bg-emerald-500/20 text-emerald-500 rounded uppercase border border-emerald-500/10">Primary</span>
+                        </div>
+                        <h4 class="font-bold text-sm tracking-tight">New Delhi - HQ Node</h4>
+                        <p class="text-[#525252] mt-1">Lead: Satish Chandra</p>
+                        <div class="mt-6 flex justify-between border-t border-[#262626] pt-4">
+                            <div>
+                                <p class="text-[9px] text-[#525252] font-bold uppercase tracking-tighter">Load</p>
+                                <p class="text-sm font-bold mono">1,240</p>
+                            </div>
+                            <div>
+                                <p class="text-[9px] text-[#525252] font-bold uppercase tracking-tighter">Value</p>
+                                <p class="text-sm font-bold mono">₹12.4L</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div
+                        class="bg-[#141414] p-5 rounded border border-[#262626] hover:border-emerald-500/50 transition-all cursor-pointer">
+                        <div class="flex items-center justify-between mb-4">
+                            <span
+                                class="w-8 h-8 rounded bg-[#262626] text-white flex items-center justify-center font-bold mono text-[10px]">MH</span>
+                            <span
+                                class="text-[9px] font-bold px-1.5 py-0.5 bg-[#262626] text-[#a3a3a3] rounded uppercase border border-[#262626]">Edge</span>
+                        </div>
+                        <h4 class="font-bold text-sm tracking-tight">Pune - Satellite</h4>
+                        <p class="text-[#525252] mt-1">Lead: Anita K.</p>
+                        <div class="mt-6 flex justify-between border-t border-[#262626] pt-4">
+                            <div>
+                                <p class="text-[9px] text-[#525252] font-bold uppercase tracking-tighter">Load</p>
+                                <p class="text-sm font-bold mono">840</p>
+                            </div>
+                            <div>
+                                <p class="text-[9px] text-[#525252] font-bold uppercase tracking-tighter">Value</p>
+                                <p class="text-sm font-bold mono">₹7.8L</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Subscriptions Section -->
+            <section id="subscriptions" class="view-section space-y-6 text-center py-20">
+                <div class="text-[#262626] mb-4"><i class="fa-solid fa-chart-line text-6xl"></i></div>
+                <h3 class="font-bold text-sm mono uppercase tracking-widest text-white">Aggregated Analytics</h3>
+                <p class="text-[#737373] max-w-sm mx-auto mt-2">Connecting Stripe/Payment gateways to visual dashboards.
+                    Subscription metrics under maintenance.</p>
+            </section>
+
+        </div>
+    </main>
+
+    <!-- Modal for Conflicts -->
+    <div id="conflict-modal"
+        class="fixed inset-0 bg-black/80 backdrop-blur-sm z-[100] hidden items-center justify-center p-4 lg:p-10">
+        <div class="bg-[#0d0d0d] w-full max-w-4xl rounded-lg border border-[#262626] overflow-hidden shadow-2xl">
+            <div class="p-4 border-b border-[#262626] flex justify-between items-center bg-[#141414]">
+                <div class="flex items-center gap-3">
+                    <i class="fa-solid fa-triangle-exclamation text-emerald-500"></i>
+                    <span class="text-[11px] font-bold mono uppercase tracking-widest">Conflict Detected:
+                        MCC_AIQ_R2</span>
+                </div>
+                <button onclick="closeModal()" class="text-[#525252] hover:text-white"><i
+                        class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="p-6 lg:p-10 grid grid-cols-1 md:grid-cols-2 gap-10">
+                <div class="space-y-4">
+                    <p class="text-[10px] font-bold uppercase text-[#525252]">Production_Current (v1.0)</p>
+                    <div class="p-5 rounded bg-[#141414] border border-[#262626] mono text-[11px] space-y-1">
+                        <p class="text-[#a3a3a3]">Institute: AIIMS_DELHI</p>
+                        <p>GEN_SEATS: <span class="text-white">36</span></p>
+                        <p>OBC_SEATS: <span class="text-white">18</span></p>
+                    </div>
+                </div>
+                <div class="space-y-4">
+                    <p class="text-[10px] font-bold uppercase text-emerald-500 tracking-widest">Incoming_Delta (v1.1)
+                    </p>
+                    <div class="p-5 rounded bg-emerald-500/5 border border-emerald-500/30 mono text-[11px] space-y-1">
+                        <p class="text-[#a3a3a3]">Institute: AIIMS_DELHI</p>
+                        <p class="text-white font-bold">GEN_SEATS: 32 <span class="text-red-400">(-4)</span></p>
+                        <p class="text-white font-bold">OBC_SEATS: 22 <span class="text-emerald-400">(+4)</span></p>
+                    </div>
+                </div>
+            </div>
+            <div class="p-4 bg-[#141414] border-t border-[#262626] flex flex-col md:flex-row justify-end gap-3">
+                <button onclick="closeModal()"
+                    class="px-5 py-2 text-[10px] text-[#a3a3a3] font-bold uppercase hover:text-white transition-all">Discard_Buffer</button>
+                <button onclick="closeModal()"
+                    class="px-5 py-2 bg-emerald-500 text-black text-[10px] font-bold uppercase hover:bg-emerald-400 transition-all">Overwrite_Production</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('sidebar-overlay');
+            sidebar.classList.toggle('sidebar-collapsed');
+            sidebar.classList.toggle('sidebar-open');
+            overlay.classList.toggle('hidden');
+        }
+
+        function switchView(viewId) {
+            const target = document.getElementById(viewId);
+            if (!target) return;
+
+            // Update Sections
+            document.querySelectorAll('.view-section').forEach(s => s.classList.remove('active'));
+            target.classList.add('active');
+
+            // Update Sidebar UI
+            document.querySelectorAll('.sidebar-link').forEach(link => {
+                link.classList.remove('active');
+                if (link.getAttribute('onclick').includes(`'${viewId}'`)) link.classList.add('active');
+            });
+
+            // Update View Title
+            const titles = {
+                'overview': '/root/overview',
+                'autoloader': '/root/pdf_parser',
+                'colleges': '/root/institute_db',
+                'franchises': '/root/network_nodes',
+                'subscriptions': '/root/analytics_pipeline'
+            };
+            document.getElementById('view-title').innerText = titles[viewId];
+
+            // Auto-close sidebar on mobile after clicking
+            if (window.innerWidth < 1024) toggleSidebar();
+        }
+
+        function simulateUpload() {
+            const row = document.getElementById('upload-row');
+            const progress = document.getElementById('upload-progress');
+            const status = document.getElementById('rows-parsed');
+
+            row.classList.remove('hidden');
+            let width = 0;
+            const interval = setInterval(() => {
+                if (width >= 100) {
+                    clearInterval(interval);
+                    status.innerText = "12,450_VALIDATED";
+                    status.className = "px-6 py-4 text-emerald-500 font-bold mono";
+                    showModal();
+                } else {
+                    width += 2;
+                    progress.style.width = width + '%';
+                    if (width < 30) status.innerText = "BUFFERING_IO...";
+                    else if (width < 70) status.innerText = "LLM_OCR_EXTRACTION...";
+                    else status.innerText = "NORMALIZING_DATA...";
+                }
+            }, 80);
+        }
+
+        function showModal() {
+            document.getElementById('conflict-modal').style.display = 'flex';
+        }
+
+        function closeModal() {
+            document.getElementById('conflict-modal').style.display = 'none';
+        }
+
+        window.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') closeModal();
+        });
+    </script>
+</body>
+
+</html>
