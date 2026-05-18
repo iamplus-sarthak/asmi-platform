@@ -107,7 +107,10 @@ export function Sidebar({ onNavigate }: SidebarProps) {
         <div className="w-[260px] h-screen bg-white border-r border-slate-200 flex flex-col fixed left-0 top-0 z-40 shadow-sm">
             {/* Logo Area */}
             <div className="h-16 flex items-center px-6 border-b border-slate-100">
-                <div className="flex items-center gap-2.5">
+                <div 
+                    onClick={() => handleNavigation("/dashboard", "Home")}
+                    className="flex items-center gap-2.5 cursor-pointer select-none"
+                >
                     <div className="h-8 w-8 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-lg flex items-center justify-center shadow-md shadow-blue-500/20">
                         <Sparkles className="h-5 w-5 text-white" />
                     </div>

@@ -63,7 +63,9 @@ export default function DashboardClient() {
 
     const handleSidebarNavigate = (path: string, label: string) => {
         // Mapping paths to Tab Types
-        if (path === "/dashboard/universities") {
+        if (path === "/dashboard") {
+            setActiveTabId("home");
+        } else if (path === "/dashboard/universities") {
             openTab({ id: "universities", label: "Universities", icon: Landmark, pinned: false, type: "universities" });
         } else if (path === "/dashboard/institutes") {
             openTab({ id: "institutes", label: "Institutes", icon: Building2, pinned: false, type: "institutes" });
