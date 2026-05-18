@@ -23,6 +23,45 @@ interface InsightsTableLayoutProps {
 export function InsightsTableLayout({ title, columns, children, counsellingName = "All India UG - Medical & Dental" }: InsightsTableLayoutProps) {
     const [isSelectorOpen, setIsSelectorOpen] = useState(false);
     const [selectedCounselling, setSelectedCounselling] = useState(counsellingName);
+    
+    // Self-contained Search & Select Round filters
+    const [searchQuery, setSearchQuery] = useState("");
+    const [selectedRound, setSelectedRound] = useState("All");
+
+    // Dynamically fetch all unique ROUND options from children's data
+    const roundOptions = ["All", ...Array.from(new Set(
+        React.Children.toArray(children)
+            .map(child => {
+                if (React.isValidElement(child)) {
+                    const props = child.props as any;
+                    if (props && props.data) {
+                        return props.data[0];
+                    }
+                }
+                return null;
+            })
+            .filter(Boolean)
+    ))];
+
+    // Filter children React elements dynamically
+    const filteredChildren = React.Children.toArray(children).filter((child) => {
+        if (!React.isValidElement(child)) return true;
+        
+        const props = child.props as any;
+        if (!props || !props.data) return true;
+        
+        const rowData: any[] = props.data;
+        
+        // Search matches any cell in the row
+        const matchesSearch = searchQuery === "" || rowData.some(cell => 
+            cell !== null && cell !== undefined && cell.toString().toLowerCase().includes(searchQuery.toLowerCase())
+        );
+        
+        // Round matches cell at index 0
+        const matchesRound = selectedRound === "All" || rowData[0] === selectedRound;
+        
+        return matchesSearch && matchesRound;
+    });
 
     const handleCounsellingSelect = (name: string) => {
         setSelectedCounselling(name);
@@ -75,18 +114,35 @@ export function InsightsTableLayout({ title, columns, children, counsellingName 
                     {/* Filters Toolbar */}
                     <div className="flex flex-col xl:flex-row items-start xl:items-center justify-between gap-4">
                         <div className="text-sm text-slate-500">
-                            <span className="font-semibold text-slate-900">1 - 3</span> of <span className="font-semibold text-slate-900">10000+</span> Records in 2025 session
+                            <span className="font-semibold text-slate-900">
+                                {filteredChildren.length > 0 ? `1 - ${filteredChildren.length}` : "0"}
+                            </span> of <span className="font-semibold text-slate-900">
+                                {React.Children.count(children)}
+                            </span> Records in 2025 session
                         </div>
 
                         <div className="flex flex-wrap items-center gap-3 w-full xl:w-auto">
                             <div className="relative flex-1 xl:w-[280px]">
                                 <Search className="absolute left-3 top-2.5 h-4 w-4 text-slate-400" />
-                                <Input placeholder="Search" className="pl-9 h-9 bg-white border-slate-200 rounded-lg text-sm" />
+                                <Input 
+                                    value={searchQuery}
+                                    onChange={(e) => setSearchQuery(e.target.value)}
+                                    placeholder="Search" 
+                                    className="pl-9 h-9 bg-white border-slate-200 rounded-lg text-sm" 
+                                />
                             </div>
 
-                            <Select>
-                                <SelectTrigger className="h-9 w-[130px] bg-white border-slate-200 text-slate-600 rounded-lg"><SelectValue placeholder="Select filter" /></SelectTrigger>
-                                <SelectContent><SelectItem value="a">A</SelectItem></SelectContent>
+                            <Select value={selectedRound} onValueChange={setSelectedRound}>
+                                <SelectTrigger className="h-9 w-[130px] bg-white border-slate-200 text-slate-600 rounded-lg">
+                                    <SelectValue placeholder="Select Round" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    {roundOptions.map((opt) => (
+                                        <SelectItem key={opt} value={opt}>
+                                            {opt === "All" ? "All Rounds" : `Round ${opt}`}
+                                        </SelectItem>
+                                    ))}
+                                </SelectContent>
                             </Select>
 
                             <Button variant="outline" size="sm" className="h-9 border-slate-200 text-slate-600 rounded-lg">
@@ -114,7 +170,15 @@ export function InsightsTableLayout({ title, columns, children, counsellingName 
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-slate-100">
-                                {children}
+                                {filteredChildren.length > 0 ? (
+                                    filteredChildren
+                                ) : (
+                                    <tr>
+                                        <td colSpan={columns.length} className="px-6 py-12 text-center text-slate-400 font-medium bg-white">
+                                            No records found matching your filters.
+                                        </td>
+                                    </tr>
+                                )}
                             </tbody>
                         </table>
                     </div>
