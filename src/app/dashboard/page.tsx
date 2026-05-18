@@ -8,12 +8,12 @@ import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 
 // Import new components
-import { UniversitiesTab } from "@/components/dashboard/UniversitiesTab";
-import { UniversityDetailTab } from "@/components/dashboard/UniversityDetailTab";
-import { InstitutesTab } from "@/components/dashboard/InstitutesTab";
-import { InstituteDetailTab } from "@/components/dashboard/InstituteDetailTab";
-import { CounsellingsTab } from "@/components/dashboard/CounsellingsTab";
-import { CounsellingDetailTab } from "@/components/dashboard/CounsellingDetailTab";
+import { UniversitiesTab } from "@/components/dashboard/explore/UniversitiesTab";
+import { UniversityDetailTab } from "@/components/dashboard/explore/UniversityDetailTab";
+import { InstitutesTab } from "@/components/dashboard/explore/InstitutesTab";
+import { InstituteDetailTab } from "@/components/dashboard/explore/InstituteDetailTab";
+import { CounsellingsTab } from "@/components/dashboard/explore/CounsellingsTab";
+import { CounsellingDetailTab } from "@/components/dashboard/explore/CounsellingDetailTab";
 import { VideosTab } from "@/components/dashboard/VideosTab";
 import { ResourcesTab } from "@/components/dashboard/ResourcesTab";
 import { HomeContent } from "@/components/dashboard/HomeContent";
