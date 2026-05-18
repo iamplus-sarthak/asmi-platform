@@ -1,7 +1,8 @@
 "use client";
 
 import React from "react";
-import { Search, Filter, Building2, MapPin, ExternalLink, ArrowRight } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { Search, Filter, Building2, MapPin, ExternalLink, ArrowRight, ArrowLeft } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 
@@ -20,8 +21,20 @@ const mockInstitutes = [
 ];
 
 export function UniversityDetailTab({ university, onInstituteClick }: UniversityDetailTabProps) {
+    const router = useRouter();
     return (
         <div className="p-6 max-w-7xl mx-auto space-y-6">
+            {/* Back Button */}
+            <div className="flex items-center">
+                <Button 
+                    onClick={() => router.push("/dashboard/universities")}
+                    variant="ghost" 
+                    className="text-slate-600 hover:text-blue-600 hover:bg-slate-50 font-semibold rounded-xl flex items-center gap-2 h-9 px-3 -ml-3 transition-all"
+                >
+                    <ArrowLeft className="h-4 w-4 text-blue-600" />
+                    Back to Universities
+                </Button>
+            </div>
             {/* Header */}
             <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm flex flex-col md:flex-row items-center justify-between gap-6">
                 <div>

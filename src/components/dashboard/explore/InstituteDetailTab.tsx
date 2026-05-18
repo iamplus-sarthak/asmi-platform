@@ -1,7 +1,8 @@
 "use client";
 
 import React from "react";
-import { Globe, MapPin, BedDouble, Building, ArrowRight, CheckCircle2 } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { Globe, MapPin, BedDouble, Building, ArrowRight, CheckCircle2, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
@@ -11,10 +12,22 @@ interface InstituteDetailTabProps {
 }
 
 export function InstituteDetailTab({ institute }: InstituteDetailTabProps) {
+    const router = useRouter();
     return (
         <div className="flex flex-col h-full bg-white">
             {/* Hero Section */}
             <div className="relative h-[300px] w-full overflow-hidden shrink-0 group">
+                {/* Back Button Overlay */}
+                <div className="absolute top-4 left-4 z-20">
+                    <Button 
+                        onClick={() => router.push("/dashboard/institutes")}
+                        variant="secondary" 
+                        className="bg-white/90 backdrop-blur-sm hover:bg-white text-slate-700 font-semibold rounded-xl shadow-md flex items-center gap-2 border border-slate-200/50 h-10 px-4 transition-all hover:scale-[1.02] active:scale-[0.98]"
+                    >
+                        <ArrowLeft className="h-4 w-4 text-blue-600" />
+                        Back to Institutes
+                    </Button>
+                </div>
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                     src={institute.img || "https://images.unsplash.com/photo-1562774053-701939374585?w=1600&q=80"}

@@ -1,7 +1,8 @@
 "use client";
 
 import React from "react";
-import { Globe, FileText, Bell, Plus, ChevronRight, BarChart2, Briefcase, Grid, FileBadge } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { Globe, FileText, Bell, Plus, ChevronRight, BarChart2, Briefcase, Grid, FileBadge, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
@@ -11,11 +12,24 @@ interface CounsellingDetailTabProps {
 }
 
 export function CounsellingDetailTab({ counselling }: CounsellingDetailTabProps) {
+    const router = useRouter();
     return (
         <div className="flex flex-col h-full bg-[#f8fafc]">
             {/* Hero Section */}
-            <div className="bg-gradient-to-b from-blue-50 to-[#f8fafc] border-b border-blue-100/50 pb-8 pt-8 px-8">
-                <div className="max-w-7xl mx-auto">
+            <div className="bg-gradient-to-b from-blue-50 to-[#f8fafc] border-b border-blue-100/50 pb-8 pt-6 px-8">
+                <div className="max-w-7xl mx-auto space-y-4">
+                    {/* Back Button */}
+                    <div className="flex items-center">
+                        <Button 
+                            onClick={() => router.push("/dashboard/counsellings")}
+                            variant="ghost" 
+                            className="text-slate-600 hover:text-blue-600 hover:bg-blue-50 font-semibold rounded-xl flex items-center gap-2 h-9 px-3 -ml-3 transition-all"
+                        >
+                            <ArrowLeft className="h-4 w-4 text-blue-600" />
+                            Back to Counsellings
+                        </Button>
+                    </div>
+
                     <div className="flex items-start gap-2 text-sm text-slate-500 mb-6">
                         <span>Counsellings</span>
                         <ChevronRight className="h-4 w-4" />

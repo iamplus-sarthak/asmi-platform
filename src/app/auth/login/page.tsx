@@ -100,7 +100,7 @@ export default function LoginPage() {
             if (data.isNewUser) {
                 setStep("PROFILE");
             } else {
-                router.push("/dashboard");
+                router.replace("/dashboard");
             }
         } catch (error) {
             alert('Invalid OTP. Please try again.');
@@ -141,7 +141,7 @@ export default function LoginPage() {
             });
 
             setUser({ ...user, onboarding_completed: true });
-            router.push("/dashboard");
+            router.replace("/dashboard");
         } catch (error) {
             alert('Failed to save profile. Please try again.');
         } finally {
