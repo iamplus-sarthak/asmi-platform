@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import { useRouter } from "next/navigation";
 import { Search, Bell, Settings, Gift, FileText, ChevronDown } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -14,6 +15,7 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 export function TopNav() {
+    const router = useRouter();
     return (
         <div className="h-16 bg-white/80 backdrop-blur-md border-b border-slate-200 flex items-center justify-between px-6 fixed top-0 left-[260px] right-0 z-30">
 
@@ -63,7 +65,10 @@ export function TopNav() {
                     <Bell className="h-5 w-5" />
                 </Button>
 
-                <div className="h-9 w-9 rounded-full bg-blue-600 flex items-center justify-center text-white font-bold shadow-md cursor-pointer border-2 border-white ring-2 ring-slate-100">
+                <div 
+                    onClick={() => router.push("/dashboard/profile")}
+                    className="h-9 w-9 rounded-full bg-blue-600 flex items-center justify-center text-white font-bold shadow-md cursor-pointer border-2 border-white ring-2 ring-slate-100 hover:scale-105 active:scale-95 transition-all select-none"
+                >
                     S
                 </div>
             </div>

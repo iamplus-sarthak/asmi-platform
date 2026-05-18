@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { Sidebar } from "@/components/layout/Sidebar";
 import { TopNav } from "@/components/layout/TopNav";
-import { X, Home, Pin, Plus, Building2, Landmark, GraduationCap, PlayCircle, BookOpen, GitMerge, Trophy, Grid, CreditCard, ScanLine, Database, Search } from "lucide-react";
+import { X, Home, Pin, Plus, Building2, Landmark, GraduationCap, PlayCircle, BookOpen, GitMerge, Trophy, Grid, CreditCard, ScanLine, Database, Search, User } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 
@@ -18,6 +18,7 @@ import { CounsellingDetailTab } from "@/components/dashboard/explore/Counselling
 import { VideosTab } from "@/components/dashboard/VideosTab";
 import { ResourcesTab } from "@/components/dashboard/ResourcesTab";
 import { HomeContent } from "@/components/dashboard/HomeContent";
+import { ProfileTab } from "@/components/dashboard/ProfileTab";
 
 // Import Insight Tabs
 import { AllotmentsTab } from "@/components/dashboard/insights/AllotmentsTab";
@@ -33,7 +34,7 @@ interface Tab {
     label: string;
     icon: any;
     pinned: boolean;
-    type: "home" | "universities" | "university-detail" | "institutes" | "institute-detail" | "counsellings" | "counselling-detail" | "videos" | "resources" | "allotments" | "closing-ranks" | "seat-matrix" | "fee-stipend" | "allotment-mapping" | "rank-scan" | "placeholder";
+    type: "home" | "universities" | "university-detail" | "institutes" | "institute-detail" | "counsellings" | "counselling-detail" | "videos" | "resources" | "allotments" | "closing-ranks" | "seat-matrix" | "fee-stipend" | "allotment-mapping" | "rank-scan" | "profile" | "placeholder";
     data?: any;
 }
 
@@ -124,6 +125,8 @@ const getTabFromSlug = (slugArr?: string[]): Tab => {
             return { id: "allotment-mapping", label: "Allotment Mapping", icon: GitMerge, pinned: false, type: "allotment-mapping" };
         case "rank-scan":
             return { id: "rank-scan", label: "Rank Scan", icon: Search, pinned: false, type: "rank-scan" };
+        case "profile":
+            return { id: "profile", label: "My Profile", icon: User, pinned: false, type: "profile" };
         default:
             return {
                 id: primaryRoute,
@@ -286,6 +289,7 @@ export default function DashboardClient() {
 
                     {activeTab.type === "allotment-mapping" && <AllotmentMappingTab />}
                     {activeTab.type === "rank-scan" && <RankScanTab />}
+                    {activeTab.type === "profile" && <ProfileTab />}
 
                     {activeTab.type === "placeholder" && (
                         <PlaceholderContent title={activeTab.label} />

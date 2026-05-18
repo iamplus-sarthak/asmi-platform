@@ -31,11 +31,32 @@ interface SidebarProps {
 }
 
 export function Sidebar({ onNavigate }: SidebarProps) {
+    const pathname = usePathname();
+
     const [openGroups, setOpenGroups] = useState<Record<string, boolean>>({
         insights: true,
         tools: false,
         explore: false,
     });
+
+    React.useEffect(() => {
+        if (pathname) {
+            if (pathname.includes("/dashboard/allotments") || 
+                pathname.includes("/dashboard/closing-ranks") || 
+                pathname.includes("/dashboard/seat-matrix") || 
+                pathname.includes("/dashboard/fee-stipend")) {
+                setOpenGroups(prev => ({ ...prev, insights: true }));
+            } else if (pathname.includes("/dashboard/allotment-mapping") || 
+                       pathname.includes("/dashboard/rank-scan")) {
+                setOpenGroups(prev => ({ ...prev, tools: true }));
+            } else if (pathname.includes("/dashboard/institutes") || 
+                       pathname.includes("/dashboard/universities") || 
+                       pathname.includes("/dashboard/counsellings") || 
+                       pathname.includes("/dashboard/courses")) {
+                setOpenGroups(prev => ({ ...prev, explore: true }));
+            }
+        }
+    }, [pathname]);
 
     const toggleGroup = (key: string) => {
         setOpenGroups(prev => ({ ...prev, [key]: !prev[key] }));
@@ -152,11 +173,17 @@ export function Sidebar({ onNavigate }: SidebarProps) {
 
                                             {item.children?.map((child, childIndex) => {
                                                 const ChildIcon = child.icon;
+                                                const isChildActive = pathname === child.path || (child.path !== "/dashboard" && pathname.startsWith(child.path));
                                                 return (
                                                     <button
                                                         key={childIndex}
                                                         onClick={() => handleNavigation(child.path, child.label)}
-                                                        className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-slate-500 hover:text-blue-600 hover:bg-slate-50 rounded-xl transition-all relative z-10"
+                                                        className={cn(
+                                                            "w-full flex items-center gap-3 px-4 py-2.5 text-sm rounded-xl transition-all relative z-10",
+                                                            isChildActive
+                                                                ? "text-blue-600 font-semibold bg-blue-50/50"
+                                                                : "text-slate-500 hover:text-blue-600 hover:bg-slate-50"
+                                                        )}
                                                     >
                                                         <ChildIcon className="h-4 w-4" />
                                                         <span>{child.label}</span>
@@ -169,13 +196,19 @@ export function Sidebar({ onNavigate }: SidebarProps) {
                             );
                         } else {
                             const Icon = item.icon;
+                            const isItemActive = pathname === item.path || (item.path !== "/dashboard" && pathname.startsWith(item.path!));
                             return (
                                 <button
                                     key={index}
                                     onClick={() => handleNavigation(item.path!, item.label)}
-                                    className="w-full flex items-center gap-3 px-4 py-3 text-slate-600 hover:text-blue-600 hover:bg-slate-50 rounded-xl transition-all group font-medium"
+                                    className={cn(
+                                        "w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all group font-medium",
+                                        isItemActive
+                                            ? "text-blue-600 font-semibold bg-blue-50/50"
+                                            : "text-slate-600 hover:text-blue-600 hover:bg-slate-50"
+                                    )}
                                 >
-                                    <Icon className="h-5 w-5 text-slate-500 group-hover:text-blue-600 transition-colors" />
+                                    <Icon className={cn("h-5 w-5 transition-colors", isItemActive ? "text-blue-600" : "text-slate-500 group-hover:text-blue-600")} />
                                     <span>{item.label}</span>
                                 </button>
                             );
@@ -186,7 +219,15 @@ export function Sidebar({ onNavigate }: SidebarProps) {
 
             {/* Bottom User Section */}
             <div className="p-4 border-t border-slate-100">
-                <div className="flex items-center gap-3 p-3 rounded-xl bg-slate-50 border border-slate-100/50 hover:bg-slate-100 transition-colors cursor-pointer">
+                <div 
+                    onClick={() => handleNavigation("/dashboard/profile", "Profile")}
+                    className={cn(
+                        "flex items-center gap-3 p-3 rounded-xl border transition-all cursor-pointer select-none",
+                        pathname === "/dashboard/profile"
+                            ? "bg-blue-50 border-blue-200 text-blue-700 font-semibold"
+                            : "bg-slate-50 border-slate-100/50 hover:bg-slate-100 text-slate-900"
+                    )}
+                >
                     <div className="h-9 w-9 rounded-full bg-blue-100 flex items-center justify-center text-blue-700 font-bold border border-blue-200">
                         S
                     </div>
