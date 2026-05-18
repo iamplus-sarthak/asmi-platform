@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import { Search, Filter, Building2, MapPin } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -25,6 +25,21 @@ const mockUniversities = [
 ];
 
 export function UniversitiesTab({ onUniversityClick }: UniversitiesTabProps) {
+    const [searchQuery, setSearchQuery] = useState("");
+    const [selectedType, setSelectedType] = useState("all");
+    const [selectedState, setSelectedState] = useState("all");
+
+    // Dynamic filtering logic
+    const filteredUniversities = mockUniversities.filter((univ) => {
+        const matchesSearch = univ.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                              univ.state.toLowerCase().includes(searchQuery.toLowerCase());
+        
+        const matchesType = selectedType === "all" || univ.type === selectedType;
+        const matchesState = selectedState === "all" || univ.state === selectedState;
+        
+        return matchesSearch && matchesType && matchesState;
+    });
+
     return (
         <div className="p-6 max-w-7xl mx-auto space-y-6">
             {/* Header Section */}
@@ -35,72 +50,83 @@ export function UniversitiesTab({ onUniversityClick }: UniversitiesTabProps) {
                     <div className="relative">
                         <Search className="absolute left-4 top-3.5 h-5 w-5 text-slate-400" />
                         <Input
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
                             placeholder="Search universities..."
                             className="pl-12 h-12 bg-slate-50 border-slate-200 focus-visible:ring-blue-500/20 text-base rounded-xl"
                         />
                     </div>
 
                     <div className="flex gap-4">
-                        <Select>
+                        <Select value={selectedType} onValueChange={setSelectedType}>
                             <SelectTrigger className="h-11 bg-white border-slate-200 rounded-xl flex-1">
                                 <SelectValue placeholder="University Type" />
                             </SelectTrigger>
                             <SelectContent>
-                                <SelectItem value="state">State Govt University</SelectItem>
-                                <SelectItem value="central">Central University</SelectItem>
-                                <SelectItem value="deemed">Deemed University</SelectItem>
+                                <SelectItem value="all">All Types</SelectItem>
+                                <SelectItem value="State Govt University">State Govt University</SelectItem>
+                                <SelectItem value="Central Autonomous">Central Autonomous</SelectItem>
                             </SelectContent>
                         </Select>
 
-                        <Select>
+                        <Select value={selectedState} onValueChange={setSelectedState}>
                             <SelectTrigger className="h-11 bg-white border-slate-200 rounded-xl flex-1">
                                 <SelectValue placeholder="State" />
                             </SelectTrigger>
                             <SelectContent>
-                                <SelectItem value="mh">Maharashtra</SelectItem>
-                                <SelectItem value="ka">Karnataka</SelectItem>
-                                <SelectItem value="dl">Delhi</SelectItem>
+                                <SelectItem value="all">All States</SelectItem>
+                                <SelectItem value="Maharashtra">Maharashtra</SelectItem>
+                                <SelectItem value="Karnataka">Karnataka</SelectItem>
+                                <SelectItem value="Delhi">Delhi</SelectItem>
+                                <SelectItem value="Tamil Nadu">Tamil Nadu</SelectItem>
+                                <SelectItem value="Gujarat">Gujarat</SelectItem>
                             </SelectContent>
                         </Select>
                     </div>
                 </div>
 
-                <p className="text-sm text-slate-500 font-medium">195 Universities found</p>
+                <p className="text-sm text-slate-500 font-medium">{filteredUniversities.length} Universities found</p>
             </div>
 
             {/* List Section */}
             <div className="grid gap-4">
-                {mockUniversities.map((univ) => (
-                    <div
-                        key={univ.id}
-                        onClick={() => onUniversityClick(univ)}
-                        className="group bg-white rounded-xl p-4 border border-slate-200 hover:border-blue-300 hover:shadow-md transition-all cursor-pointer flex items-center gap-6"
-                    >
-                        <div className="h-12 w-12 rounded-lg bg-slate-100 flex items-center justify-center text-slate-500 group-hover:bg-blue-50 group-hover:text-blue-600 transition-colors">
-                            <Building2 className="h-6 w-6" />
-                        </div>
+                {filteredUniversities.length > 0 ? (
+                    filteredUniversities.map((univ) => (
+                        <div
+                            key={univ.id}
+                            onClick={() => onUniversityClick(univ)}
+                            className="group bg-white rounded-xl p-4 border border-slate-200 hover:border-blue-300 hover:shadow-md transition-all cursor-pointer flex items-center gap-6"
+                        >
+                            <div className="h-12 w-12 rounded-lg bg-slate-100 flex items-center justify-center text-slate-500 group-hover:bg-blue-50 group-hover:text-blue-600 transition-colors">
+                                <Building2 className="h-6 w-6" />
+                            </div>
 
-                        <div className="flex-1">
-                            <h3 className="text-lg font-semibold text-slate-900 group-hover:text-blue-700 transition-colors mb-1">
-                                {univ.name}
-                            </h3>
-                            <div className="flex items-center gap-4 text-sm text-slate-500">
-                                <span className="flex items-center gap-1.5">
-                                    <MapPin className="h-3.5 w-3.5" />
-                                    {univ.state}
+                            <div className="flex-1">
+                                <h3 className="text-lg font-semibold text-slate-900 group-hover:text-blue-700 transition-colors mb-1">
+                                    {univ.name}
+                                </h3>
+                                <div className="flex items-center gap-4 text-sm text-slate-500">
+                                    <span className="flex items-center gap-1.5">
+                                        <MapPin className="h-3.5 w-3.5" />
+                                        {univ.state}
+                                    </span>
+                                    <span className="h-1 w-1 rounded-full bg-slate-300" />
+                                    <span>{univ.type}</span>
+                                </div>
+                            </div>
+
+                            <div className="hidden md:flex items-center justify-end px-4">
+                                <span className="text-xs font-medium bg-slate-100 text-slate-600 px-3 py-1 rounded-full group-hover:bg-blue-100 group-hover:text-blue-700">
+                                    {univ.count} Institutes
                                 </span>
-                                <span className="h-1 w-1 rounded-full bg-slate-300" />
-                                <span>{univ.type}</span>
                             </div>
                         </div>
-
-                        <div className="hidden md:flex items-center justify-end px-4">
-                            <span className="text-xs font-medium bg-slate-100 text-slate-600 px-3 py-1 rounded-full group-hover:bg-blue-100 group-hover:text-blue-700">
-                                {univ.count} Institutes
-                            </span>
-                        </div>
+                    ))
+                ) : (
+                    <div className="text-center py-12 bg-white rounded-xl border border-slate-200 text-slate-400 font-medium">
+                        No universities found matching your search.
                     </div>
-                ))}
+                )}
             </div>
         </div>
     );
