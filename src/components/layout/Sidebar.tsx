@@ -25,7 +25,6 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
-import { ScrollArea } from "@/components/ui/scroll-area";
 
 interface SidebarProps {
     onNavigate?: (path: string, label: string) => void;
@@ -120,7 +119,7 @@ export function Sidebar({ onNavigate }: SidebarProps) {
                 </div>
             </div>
 
-            <ScrollArea className="flex-1 py-6 px-4">
+            <div className="flex-1 overflow-y-auto py-6 px-4 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
                 <div className="space-y-2">
                     {menuItems.map((item, index) => {
                         if (item.type === "group") {
@@ -183,7 +182,7 @@ export function Sidebar({ onNavigate }: SidebarProps) {
                         }
                     })}
                 </div>
-            </ScrollArea>
+            </div>
 
             {/* Bottom User Section */}
             <div className="p-4 border-t border-slate-100">
