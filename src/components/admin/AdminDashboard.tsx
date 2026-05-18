@@ -3,7 +3,8 @@
 import React from "react";
 import { TrendingUp, Users, DollarSign, FileText, ArrowUp, ArrowDown } from "lucide-react";
 import { Card } from "@/components/ui/card";
-
+import { Button } from "@/components/ui/button";
+import { fetchFromAPI } from "@/lib/api-client";
 export function AdminDashboard() {
     const stats = [
         {
@@ -62,9 +63,20 @@ export function AdminDashboard() {
     return (
         <div className="p-8 space-y-8">
             {/* Header */}
-            <div>
-                <h1 className="text-3xl font-bold text-slate-900">Dashboard</h1>
-                <p className="text-slate-500 mt-1">Welcome back! Here's what's happening today.</p>
+            <div className="flex items-center justify-between">
+                <div>
+                    <h1 className="text-3xl font-bold text-slate-900">Dashboard</h1>
+                    <p className="text-slate-500 mt-1">Welcome back! Here's what's happening today.</p>
+                </div>
+                <Button onClick={async () => {
+                    try {
+                        const data = await fetchFromAPI('/api/users');
+                        alert(`API Success! Payload responded with ${data.totalDocs || 0} users.`);
+                        console.log(data);
+                    } catch (error) {
+                        alert('API Failed! Check console for CORS or Network errors.');
+                    }
+                }}>Test API Connection</Button>
             </div>
 
             {/* Stats Grid */}

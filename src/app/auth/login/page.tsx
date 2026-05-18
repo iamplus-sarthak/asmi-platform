@@ -5,6 +5,8 @@ import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
+import { fetchFromAPI } from "@/lib/api-client";
+import { useAuthStore } from "@/store/useAuthStore";
 import { Button } from "@/components/ui/button";
 import {
     Form,
@@ -47,8 +49,10 @@ type Step = "MOBILE" | "OTP" | "PROFILE";
 
 export default function LoginPage() {
     const router = useRouter();
+    const { user, setUser } = useAuthStore();
     const [step, setStep] = useState<Step>("MOBILE");
     const [isLoading, setIsLoading] = useState(false);
+    const [otpValue, setOtpValue] = useState("");
 
     // Login Form
     const loginForm = useForm<z.infer<typeof loginSchema>>({
@@ -70,26 +74,79 @@ export default function LoginPage() {
 
     const onMobileSubmit = async (data: z.infer<typeof loginSchema>) => {
         setIsLoading(true);
-        setTimeout(() => {
-            setIsLoading(false);
+        try {
+            await fetchFromAPI('/api/users/send-otp', {
+                method: 'POST',
+                body: JSON.stringify({ mobile: data.mobile })
+            });
             setStep("OTP");
-        }, 1000);
+        } catch (error) {
+            alert('Failed to send OTP. Please try again.');
+        } finally {
+            setIsLoading(false);
+        }
     };
 
     const verifyOTP = async () => {
+        if (otpValue.length !== 4) return alert('Enter full OTP');
         setIsLoading(true);
-        setTimeout(() => {
+        try {
+            const data = await fetchFromAPI('/api/users/verify-otp', {
+                method: 'POST',
+                body: JSON.stringify({ mobile: loginForm.getValues().mobile, otp: otpValue })
+            });
+            setUser(data.user);
+            localStorage.setItem('payload-token', data.token);
+            if (data.isNewUser) {
+                setStep("PROFILE");
+            } else {
+                router.push("/dashboard");
+            }
+        } catch (error) {
+            alert('Invalid OTP. Please try again.');
+        } finally {
             setIsLoading(false);
-            setStep("PROFILE");
-        }, 1000);
+        }
     };
 
     const onProfileSubmit = async (data: z.infer<typeof profileSchema>) => {
+        if (!user) return alert('Session expired');
         setIsLoading(true);
-        setTimeout(() => {
-            setIsLoading(false);
+        try {
+            const token = localStorage.getItem('payload-token');
+            const headers: Record<string, string> = token ? { 'Authorization': `JWT ${token}` } : {};
+
+            const studentRes = await fetchFromAPI('/api/students', {
+                method: 'POST',
+                headers,
+                body: JSON.stringify({
+                    full_name: data.fullName,
+                    email: data.email,
+                    phone_number: loginForm.getValues().mobile,
+                    current_class: data.currentClass,
+                    user_id: user.id
+                })
+            });
+
+            await fetchFromAPI(`/api/users/${user.id}`, {
+                method: 'PATCH',
+                headers,
+                body: JSON.stringify({
+                    onboarding_completed: true,
+                    entity_id: {
+                        relationTo: 'students',
+                        value: studentRes.doc?.id
+                    }
+                })
+            });
+
+            setUser({ ...user, onboarding_completed: true });
             router.push("/dashboard");
-        }, 1500);
+        } catch (error) {
+            alert('Failed to save profile. Please try again.');
+        } finally {
+            setIsLoading(false);
+        }
     };
 
     return (
@@ -237,8 +294,8 @@ export default function LoginPage() {
                             <div className="flex justify-center">
                                 <InputOTP
                                     maxLength={4}
-                                    value="1234"
-                                    onChange={() => { }}
+                                    value={otpValue}
+                                    onChange={setOtpValue}
                                 >
                                     <InputOTPGroup className="gap-4">
                                         {[0, 1, 2, 3].map((index) => (
