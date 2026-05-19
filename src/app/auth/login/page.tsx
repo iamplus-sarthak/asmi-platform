@@ -34,7 +34,11 @@ import { cn } from "@/lib/utils";
 
 // Form Schemas
 const loginSchema = z.object({
-    mobile: z.string().min(10, "Valid mobile number is required"),
+    mobile: z
+        .string()
+        .min(10, "Mobile number must be exactly 10 digits")
+        .max(10, "Mobile number must be exactly 10 digits")
+        .regex(/^[6-9]\d{9}$/, "Please enter a valid 10-digit Indian mobile number"),
 });
 
 const profileSchema = z.object({
@@ -246,8 +250,13 @@ export default function LoginPage() {
                                                     <Input
                                                         placeholder="Mobile Number"
                                                         type="tel"
+                                                        maxLength={10}
                                                         className="h-14 bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400 focus-visible:ring-blue-500/20 focus-visible:border-blue-500 rounded-xl"
                                                         {...field}
+                                                        onChange={(e) => {
+                                                            const val = e.target.value.replace(/\D/g, "");
+                                                            field.onChange(val);
+                                                        }}
                                                     />
                                                 </FormControl>
                                                 <FormMessage className="text-red-500" />
