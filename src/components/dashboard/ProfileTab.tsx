@@ -211,10 +211,8 @@ export function ProfileTab() {
                 <p className="text-slate-500">Manage your academic details, target exams, and personal eligibility parameters.</p>
             </div>
 
-            {/* Profile Overview Card (Gradient Style) */}
-            <div className="relative overflow-hidden bg-gradient-to-r from-blue-600 to-indigo-700 rounded-3xl p-8 text-white shadow-xl shadow-blue-500/10 flex flex-col md:flex-row items-center gap-6">
-                <div className="absolute right-0 top-0 w-64 h-64 bg-white/5 rounded-full blur-3xl -mr-16 -mt-16 pointer-events-none" />
-                <div className="absolute left-1/3 bottom-0 w-32 h-32 bg-white/5 rounded-full blur-2xl -ml-8 -mb-8 pointer-events-none" />
+            {/* Profile Overview Card (Solid Style) */}
+            <div className="relative overflow-hidden bg-blue-600 rounded-3xl p-8 text-white shadow-md flex flex-col md:flex-row items-center gap-6">
 
                 {/* Avatar */}
                 <div className="h-24 w-24 rounded-2xl bg-white/10 backdrop-blur-md border border-white/20 flex items-center justify-center text-3xl font-bold shadow-inner uppercase">
@@ -438,7 +436,6 @@ export function ProfileTab() {
                         
                         {/* Reusable UI Component: Shadcn Card for Subscription */}
                         <Card className="bg-white border-slate-200 shadow-sm rounded-2xl overflow-hidden relative">
-                            <div className="absolute right-0 bottom-0 w-32 h-32 bg-blue-50 rounded-full blur-2xl pointer-events-none" />
                             <CardHeader className="pb-4">
                                 <CardTitle className="text-xs font-semibold text-slate-400 uppercase tracking-wider">
                                     Current Subscription
@@ -469,7 +466,7 @@ export function ProfileTab() {
 
                                 {/* Upgrade CTA */}
                                 <div className="pt-2">
-                                    <Button type="button" className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold h-11 rounded-xl shadow-lg shadow-blue-500/20 flex items-center justify-center gap-2 group">
+                                    <Button type="button" className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold h-11 rounded-xl flex items-center justify-center gap-2 group">
                                         Upgrade to Premium
                                         <ArrowRight className="h-4 w-4 group-hover:translate-x-0.5 transition-transform" />
                                     </Button>
