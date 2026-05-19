@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Search, Bell, Settings, Gift, FileText, ChevronDown } from "lucide-react";
 import { Input } from "@/components/ui/input";
@@ -13,9 +13,13 @@ import {
     SelectValue,
 } from "@/components/ui/select";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { NotificationDrawer } from "@/components/dashboard/NotificationDrawer";
 
 export function TopNav() {
     const router = useRouter();
+    const [isNotificationOpen, setIsNotificationOpen] = useState(false);
+    const [unreadCount, setUnreadCount] = useState(0);
+
     return (
         <div className="h-16 bg-white/80 backdrop-blur-md border-b border-slate-200 flex items-center justify-between px-6 fixed top-0 left-[260px] right-0 z-30">
 
@@ -61,8 +65,16 @@ export function TopNav() {
 
                 <div className="h-6 w-px bg-slate-200 mx-2" />
 
-                <Button variant="ghost" size="icon" className="h-9 w-9 rounded-full text-slate-500 hover:text-blue-600 hover:bg-blue-50 transition-colors">
+                <Button 
+                    variant="ghost" 
+                    size="icon" 
+                    onClick={() => setIsNotificationOpen(true)}
+                    className="h-9 w-9 rounded-full text-slate-500 hover:text-blue-600 hover:bg-blue-50 transition-colors relative"
+                >
                     <Bell className="h-5 w-5" />
+                    {unreadCount > 0 && (
+                        <span className="absolute top-1.5 right-1.5 h-2.5 w-2.5 bg-red-500 border-2 border-white rounded-full animate-bounce" />
+                    )}
                 </Button>
 
                 <div 
@@ -72,6 +84,13 @@ export function TopNav() {
                     S
                 </div>
             </div>
+
+            {/* Slide-out Notification Drawer */}
+            <NotificationDrawer 
+                isOpen={isNotificationOpen} 
+                onClose={() => setIsNotificationOpen(false)} 
+                onUnreadChange={setUnreadCount}
+            />
         </div>
     );
 }
