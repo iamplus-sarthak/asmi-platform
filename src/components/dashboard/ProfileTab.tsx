@@ -9,6 +9,9 @@ import { User, Mail, Phone, MapPin, Award, ShieldCheck, Check, Sparkles, Lock, A
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { logoutUser } from "@/app/auth/actions";
+import { useAuthStore } from "@/store/useAuthStore";
+import { fetchFromAPI } from "@/lib/api-client";
 import {
     Card,
     CardContent,
@@ -46,36 +49,117 @@ export function ProfileTab() {
     const router = useRouter();
     const [isSaving, setIsSaving] = useState(false);
     const [saveStatus, setSaveStatus] = useState<"idle" | "saved">("idle");
+    const [student, setStudent] = useState<any>(null);
+    const [isLoadingProfile, setIsLoadingProfile] = useState(true);
 
-    const handleLogout = () => {
-        router.push("/auth/login");
+    const { user, setUser, isLoading: isAuthLoading } = useAuthStore();
+
+    React.useEffect(() => {
+        const fetchStudentProfile = async () => {
+            if (isAuthLoading) return;
+            if (!user?.id) {
+                setIsLoadingProfile(false);
+                return;
+            }
+            setIsLoadingProfile(true);
+            try {
+                const token = localStorage.getItem("payload-token");
+                const headers: Record<string, string> = token ? { "Authorization": `JWT ${token}` } : {};
+
+                // Query students collection directly where user_id equals current user.id
+                const res = await fetchFromAPI(`/api/students?where[user_id][equals]=${user.id}`, {
+                    headers,
+                });
+
+                if (res?.docs && res.docs.length > 0) {
+                    setStudent(res.docs[0]);
+                }
+            } catch (error) {
+                console.error("Failed to fetch student profile:", error);
+            } finally {
+                setIsLoadingProfile(false);
+            }
+        };
+
+        fetchStudentProfile();
+    }, [user, isAuthLoading]);
+
+    const handleLogout = async () => {
+        try {
+            await logoutUser();
+        } catch (err) {
+            console.error("Logout failed:", err);
+        } finally {
+            router.push("/auth/login");
+        }
     };
 
     // Initialize React Hook Form with Zod Resolver
     const form = useForm<z.infer<typeof profileSchema>>({
         resolver: zodResolver(profileSchema),
         defaultValues: {
-            fullName: "Sarthak Sharma",
-            email: "sarthak@example.com",
-            phone: "+91 98765 43210",
+            fullName: "",
+            email: "",
+            phone: "",
             state: "maharashtra",
             exam: "neet-ug",
             currentClass: "12",
         },
     });
 
-    // Form onSubmit Handler
-    const onSubmit = (data: z.infer<typeof profileSchema>) => {
+    // Reset form dynamically when student profile is loaded from backend
+    React.useEffect(() => {
+        if (student) {
+            form.reset({
+                fullName: student.full_name || "",
+                email: student.email || "",
+                phone: student.phone_number || user?.phone_number || "",
+                state: student.state_id?.slug || student.state_id || "maharashtra",
+                exam: student.prefferd_exam_id?.slug || student.prefferd_exam_id || "neet-ug",
+                currentClass: student.current_class || "12",
+            });
+        }
+    }, [student, user, form]);
+
+    // Form onSubmit Handler - updates backend PostgreSQL database live!
+    const onSubmit = async (data: z.infer<typeof profileSchema>) => {
+        if (!student?.id) return;
         setIsSaving(true);
         setSaveStatus("idle");
         
-        setTimeout(() => {
+        try {
+            const token = localStorage.getItem("payload-token");
+            const headers: Record<string, string> = token ? { "Authorization": `JWT ${token}` } : {};
+
+            const updatedStudent = await fetchFromAPI(`/api/students/${student.id}`, {
+                method: "PATCH",
+                headers,
+                body: JSON.stringify({
+                    full_name: data.fullName,
+                    email: data.email,
+                    phone_number: data.phone,
+                    current_class: data.currentClass,
+                }),
+            });
+
+            if (updatedStudent?.doc) {
+                // Update local auth store state dynamically
+                setUser({
+                    ...user!,
+                    entity_id: updatedStudent.doc,
+                });
+            }
+
             setIsSaving(false);
             setSaveStatus("saved");
             setTimeout(() => {
                 setSaveStatus("idle");
             }, 3000);
-        }, 1200);
+        } catch (error) {
+            console.error("Failed to update profile:", error);
+            alert("Failed to save changes. Please try again.");
+            setIsSaving(false);
+        }
     };
 
     // Watched fields for dynamic profile header updates
@@ -106,6 +190,15 @@ export function ProfileTab() {
         if (val === "dropper") return "Dropper";
         return val || "";
     };
+
+    if (isLoadingProfile) {
+        return (
+            <div className="flex flex-col items-center justify-center min-h-[50vh] gap-3 animate-in fade-in duration-300">
+                <div className="h-10 w-10 border-4 border-blue-600 border-t-transparent rounded-full animate-spin" />
+                <p className="text-slate-500 font-medium">Loading your profile from database...</p>
+            </div>
+        );
+    }
 
     return (
         <div className="p-6 max-w-5xl mx-auto space-y-8 animate-in fade-in duration-300">
