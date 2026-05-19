@@ -14,11 +14,37 @@ import {
 } from "@/components/ui/select";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { NotificationDrawer } from "@/components/dashboard/NotificationDrawer";
+import { useAuthStore } from "@/store/useAuthStore";
+import { fetchFromAPI } from "@/lib/api-client";
 
 export function TopNav() {
     const router = useRouter();
     const [isNotificationOpen, setIsNotificationOpen] = useState(false);
     const [unreadCount, setUnreadCount] = useState(0);
+    const { user } = useAuthStore();
+    const [userInitial, setUserInitial] = useState("U");
+
+    React.useEffect(() => {
+        const fetchStudentName = async () => {
+            if (!user?.id) return;
+            try {
+                const token = localStorage.getItem("payload-token");
+                const headers: Record<string, string> = token ? { "Authorization": `JWT ${token}` } : {};
+                const res = await fetchFromAPI(`/api/students?where[user_id][equals]=${user.id}`, { headers });
+                
+                if (res?.docs && res.docs.length > 0 && res.docs[0].full_name) {
+                    setUserInitial(res.docs[0].full_name.charAt(0).toUpperCase());
+                } else if (user.phone_number) {
+                    // Fallback to phone number if full_name is not filled out
+                    setUserInitial(user.phone_number.charAt(0));
+                }
+            } catch (error) {
+                console.error("Failed to fetch student for avatar:", error);
+            }
+        };
+
+        fetchStudentName();
+    }, [user]);
 
     return (
         <div className="h-16 bg-white/80 backdrop-blur-md border-b border-slate-200 flex items-center justify-between px-6 fixed top-0 left-[260px] right-0 z-30">
@@ -79,9 +105,9 @@ export function TopNav() {
 
                 <div 
                     onClick={() => router.push("/dashboard/profile")}
-                    className="h-9 w-9 rounded-full bg-blue-600 flex items-center justify-center text-white font-bold shadow-md cursor-pointer border-2 border-white ring-2 ring-slate-100 hover:scale-105 active:scale-95 transition-all select-none"
+                    className="h-9 w-9 rounded-full bg-blue-600 flex items-center justify-center text-white font-bold shadow-md cursor-pointer border-2 border-white ring-2 ring-slate-100 hover:scale-105 active:scale-95 transition-all select-none uppercase"
                 >
-                    S
+                    {userInitial}
                 </div>
             </div>
 
