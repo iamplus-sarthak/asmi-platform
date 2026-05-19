@@ -11,7 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { logoutUser } from "@/app/auth/actions";
 import { useAuthStore } from "@/store/useAuthStore";
-import { fetchFromAPI } from "@/lib/api-client";
+import { getStudentProfileAction, updateStudentProfileAction } from "@/actions/profile";
 import {
     Card,
     CardContent,
@@ -63,16 +63,9 @@ export function ProfileTab() {
             }
             setIsLoadingProfile(true);
             try {
-                const token = localStorage.getItem("payload-token");
-                const headers: Record<string, string> = token ? { "Authorization": `JWT ${token}` } : {};
-
-                // Query students collection directly where user_id equals current user.id
-                const res = await fetchFromAPI(`/api/students?where[user_id][equals]=${user.id}`, {
-                    headers,
-                });
-
-                if (res?.docs && res.docs.length > 0) {
-                    setStudent(res.docs[0]);
+                const res = await getStudentProfileAction(user.id);
+                if (res?.student) {
+                    setStudent(res.student);
                 }
             } catch (error) {
                 console.error("Failed to fetch student profile:", error);
@@ -128,25 +121,20 @@ export function ProfileTab() {
         setSaveStatus("idle");
         
         try {
-            const token = localStorage.getItem("payload-token");
-            const headers: Record<string, string> = token ? { "Authorization": `JWT ${token}` } : {};
-
-            const updatedStudent = await fetchFromAPI(`/api/students/${student.id}`, {
-                method: "PATCH",
-                headers,
-                body: JSON.stringify({
-                    full_name: data.fullName,
-                    email: data.email,
-                    phone_number: data.phone,
-                    current_class: data.currentClass,
-                }),
+            const res = await updateStudentProfileAction(student.id, {
+                fullName: data.fullName,
+                email: data.email,
+                phone: data.phone,
+                currentClass: data.currentClass,
             });
 
-            if (updatedStudent?.doc) {
+            if (res.error) throw new Error(res.error);
+
+            if (res.student) {
                 // Update local auth store state dynamically
                 setUser({
                     ...user!,
-                    entity_id: updatedStudent.doc,
+                    entity_id: res.student as any,
                 });
             }
 

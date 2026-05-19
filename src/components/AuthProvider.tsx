@@ -2,37 +2,15 @@
 
 import { useEffect } from 'react'
 import { useAuthStore } from '@/store/useAuthStore'
-import { fetchFromAPI } from '@/lib/api-client'
+// Fetch from API removed
 
-export function AuthProvider({ children }: { children: React.ReactNode }) {
+export function AuthProvider({ children, initialUser }: { children: React.ReactNode, initialUser?: any }) {
   const { setUser, setIsLoading } = useAuthStore()
 
   useEffect(() => {
-    const initAuth = async () => {
-      try {
-        const token = localStorage.getItem('payload-token');
-        const headers: Record<string, string> = token ? { 'Authorization': `JWT ${token}` } : {};
-
-        const data = await fetchFromAPI('/api/users/me', {
-          credentials: 'include',
-          headers,
-        })
-        
-        if (data?.user) {
-          setUser(data.user)
-        } else {
-          setUser(null)
-        }
-      } catch (error) {
-        console.error('Failed to fetch user session:', error)
-        setUser(null)
-      } finally {
-        setIsLoading(false)
-      }
-    }
-
-    initAuth()
-  }, [setUser, setIsLoading])
+    setUser(initialUser || null);
+    setIsLoading(false);
+  }, [initialUser, setUser, setIsLoading]);
 
   return <>{children}</>
 }

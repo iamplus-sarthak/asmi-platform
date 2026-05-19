@@ -15,7 +15,7 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { NotificationDrawer } from "@/components/dashboard/NotificationDrawer";
 import { useAuthStore } from "@/store/useAuthStore";
-import { fetchFromAPI } from "@/lib/api-client";
+import { getStudentProfileAction } from "@/actions/profile";
 
 export function TopNav() {
     const router = useRouter();
@@ -28,14 +28,11 @@ export function TopNav() {
         const fetchStudentName = async () => {
             if (!user?.id) return;
             try {
-                const token = localStorage.getItem("payload-token");
-                const headers: Record<string, string> = token ? { "Authorization": `JWT ${token}` } : {};
-                const res = await fetchFromAPI(`/api/students?where[user_id][equals]=${user.id}`, { headers });
+                const res = await getStudentProfileAction(user.id);
                 
-                if (res?.docs && res.docs.length > 0 && res.docs[0].full_name) {
-                    setUserInitial(res.docs[0].full_name.charAt(0).toUpperCase());
+                if (res?.student && res.student.full_name) {
+                    setUserInitial(res.student.full_name.charAt(0).toUpperCase());
                 } else if (user.phone_number) {
-                    // Fallback to phone number if full_name is not filled out
                     setUserInitial(user.phone_number.charAt(0));
                 }
             } catch (error) {

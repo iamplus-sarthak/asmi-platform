@@ -5,7 +5,8 @@ import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { fetchFromAPI } from "@/lib/api-client";
+import { sendOtpAction, verifyOtpAction } from "@/actions/auth";
+import { createStudentProfileAction } from "@/actions/profile";
 import { useAuthStore } from "@/store/useAuthStore";
 import { Button } from "@/components/ui/button";
 import {
@@ -79,10 +80,8 @@ export default function LoginPage() {
     const onMobileSubmit = async (data: z.infer<typeof loginSchema>) => {
         setIsLoading(true);
         try {
-            await fetchFromAPI('/api/users/send-otp', {
-                method: 'POST',
-                body: JSON.stringify({ mobile: data.mobile })
-            });
+            const res = await sendOtpAction(data.mobile);
+            if (res.error) throw new Error(res.error);
             setStep("OTP");
         } catch (error) {
             alert('Failed to send OTP. Please try again.');
@@ -95,13 +94,15 @@ export default function LoginPage() {
         if (otpValue.length !== 4) return alert('Enter full OTP');
         setIsLoading(true);
         try {
-            const data = await fetchFromAPI('/api/users/verify-otp', {
-                method: 'POST',
-                body: JSON.stringify({ mobile: loginForm.getValues().mobile, otp: otpValue })
-            });
-            setUser(data.user);
-            localStorage.setItem('payload-token', data.token);
-            if (data.isNewUser) {
+            const res = await verifyOtpAction(loginForm.getValues().mobile, otpValue);
+            if (res.error) throw new Error(res.error);
+            
+            setUser(res.user as any);
+            // No need to set token in localStorage anymore! The HTTP-only cookie is set securely on the server.
+            
+            if (res.role === 'admin') {
+                router.replace("/admin");
+            } else if (res.isNewUser) {
                 setStep("PROFILE");
             } else {
                 router.replace("/dashboard");
@@ -117,32 +118,16 @@ export default function LoginPage() {
         if (!user) return alert('Session expired');
         setIsLoading(true);
         try {
-            const token = localStorage.getItem('payload-token');
-            const headers: Record<string, string> = token ? { 'Authorization': `JWT ${token}` } : {};
-
-            const studentRes = await fetchFromAPI('/api/students', {
-                method: 'POST',
-                headers,
-                body: JSON.stringify({
-                    full_name: data.fullName,
-                    email: data.email,
-                    phone_number: loginForm.getValues().mobile,
-                    current_class: data.currentClass,
-                    user_id: user.id
-                })
+            const res = await createStudentProfileAction({
+                fullName: data.fullName,
+                email: data.email,
+                phone: loginForm.getValues().mobile,
+                currentClass: data.currentClass,
+                exam: data.exam,
+                state: data.state
             });
 
-            await fetchFromAPI(`/api/users/${user.id}`, {
-                method: 'PATCH',
-                headers,
-                body: JSON.stringify({
-                    onboarding_completed: true,
-                    entity_id: {
-                        relationTo: 'students',
-                        value: studentRes.doc?.id
-                    }
-                })
-            });
+            if (res.error) throw new Error(res.error);
 
             setUser({ ...user, onboarding_completed: true });
             router.replace("/dashboard");

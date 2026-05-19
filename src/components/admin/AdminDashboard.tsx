@@ -4,7 +4,7 @@ import React from "react";
 import { TrendingUp, Users, DollarSign, FileText, ArrowUp, ArrowDown } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { fetchFromAPI } from "@/lib/api-client";
+import { testDbConnectionAction } from "@/actions/admin";
 export function AdminDashboard() {
     const stats = [
         {
@@ -70,13 +70,14 @@ export function AdminDashboard() {
                 </div>
                 <Button onClick={async () => {
                     try {
-                        const data = await fetchFromAPI('/api/users');
-                        alert(`API Success! Payload responded with ${data.totalDocs || 0} users.`);
-                        console.log(data);
+                        const res = await testDbConnectionAction();
+                        if (res.error) throw new Error(res.error);
+                        alert(`Database Success! Payload responded with ${res.totalDocs || 0} users.`);
+                        console.log(res);
                     } catch (error) {
-                        alert('API Failed! Check console for CORS or Network errors.');
+                        alert('Database Query Failed! Check console for errors.');
                     }
-                }}>Test API Connection</Button>
+                }}>Test DB Connection</Button>
             </div>
 
             {/* Stats Grid */}
