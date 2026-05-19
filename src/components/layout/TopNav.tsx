@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Search, Bell, Settings, Gift, FileText, ChevronDown } from "lucide-react";
+import { Search, Bell, Settings, Gift, FileText, ChevronDown, Newspaper } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import {
@@ -75,8 +75,12 @@ export function TopNav() {
             {/* Right: Actions */}
             <div className="flex items-center gap-4">
 
-                <Button variant="ghost" className="h-9 px-3 text-slate-500 hover:text-blue-600 hover:bg-blue-50 rounded-lg text-sm font-medium hidden lg:flex transition-colors">
-                    <FileText className="mr-2 h-4 w-4" />
+                <Button 
+                    variant="ghost" 
+                    onClick={() => router.push("/dashboard/blogs-news")}
+                    className="h-9 px-3 text-slate-500 hover:text-blue-600 hover:bg-blue-50 rounded-lg text-sm font-medium hidden lg:flex transition-colors"
+                >
+                    <Newspaper className="mr-2 h-4 w-4" />
                     Blogs & News
                 </Button>
 
