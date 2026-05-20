@@ -22,7 +22,7 @@ export function SearchBar({
         <div className={cn("relative w-full", className)}>
             <Search className="absolute left-4 top-3.5 h-5 w-5 text-slate-400" />
             <Input
-                value={value}
+                value={value || ""}
                 onChange={(e) => onChange(e.target.value)}
                 placeholder={placeholder}
                 className="pl-12 h-12 bg-slate-50 border-slate-200 focus-visible:ring-blue-500/20 text-base rounded-2xl"
