@@ -454,7 +454,11 @@ export function ProfileTab() {
 
                                 {/* Upgrade CTA */}
                                 <div className="pt-2">
-                                    <Button type="button" className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold h-11 rounded-xl flex items-center justify-center gap-2 group">
+                                    <Button
+                                        type="button"
+                                        onClick={() => router.push("/dashboard/packages")}
+                                        className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold h-11 rounded-xl flex items-center justify-center gap-2 group"
+                                    >
                                         Upgrade to Premium
                                         <ArrowRight className="h-4 w-4 group-hover:translate-x-0.5 transition-transform" />
                                     </Button>

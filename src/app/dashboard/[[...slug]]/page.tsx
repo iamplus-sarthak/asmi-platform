@@ -20,6 +20,7 @@ import { ResourcesTab } from "@/components/dashboard/ResourcesTab";
 import { HomeContent } from "@/components/dashboard/HomeContent";
 import { ProfileTab } from "@/components/dashboard/ProfileTab";
 import { BlogsNewsTab } from "@/components/dashboard/BlogsNewsTab";
+import { PackagesTab } from "@/components/dashboard/PackagesTab";
 
 // Import Insight Tabs
 import { AllotmentsTab } from "@/components/dashboard/insights/AllotmentsTab";
@@ -35,7 +36,7 @@ interface Tab {
     label: string;
     icon: any;
     pinned: boolean;
-    type: "home" | "universities" | "university-detail" | "institutes" | "institute-detail" | "counsellings" | "counselling-detail" | "videos" | "resources" | "allotments" | "closing-ranks" | "seat-matrix" | "fee-stipend" | "allotment-mapping" | "rank-scan" | "profile" | "blogs-news" | "placeholder";
+    type: "home" | "universities" | "university-detail" | "institutes" | "institute-detail" | "counsellings" | "counselling-detail" | "videos" | "resources" | "allotments" | "closing-ranks" | "seat-matrix" | "fee-stipend" | "allotment-mapping" | "rank-scan" | "profile" | "blogs-news" | "packages" | "placeholder";
     data?: any;
 }
 
@@ -130,6 +131,8 @@ const getTabFromSlug = (slugArr?: string[]): Tab => {
             return { id: "profile", label: "My Profile", icon: User, pinned: false, type: "profile" };
         case "blogs-news":
             return { id: "blogs-news", label: "Blogs & News", icon: Newspaper, pinned: false, type: "blogs-news" };
+        case "packages":
+            return { id: "packages", label: "Get a Package", icon: CreditCard, pinned: false, type: "packages" };
         default:
             return {
                 id: primaryRoute,
@@ -294,6 +297,7 @@ export default function DashboardClient() {
                     {activeTab.type === "rank-scan" && <RankScanTab />}
                     {activeTab.type === "profile" && <ProfileTab />}
                     {activeTab.type === "blogs-news" && <BlogsNewsTab />}
+                    {activeTab.type === "packages" && <PackagesTab />}
 
                     {activeTab.type === "placeholder" && (
                         <PlaceholderContent title={activeTab.label} />

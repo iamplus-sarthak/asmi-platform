@@ -86,7 +86,11 @@ export function TopNav() {
                     Refer & Earn
                 </Button>
 
-                <Button size="sm" className="bg-blue-600 hover:bg-blue-700 text-white rounded-full px-5 font-medium">
+                <Button
+                    size="sm"
+                    onClick={() => router.push("/dashboard/packages")}
+                    className="bg-blue-600 hover:bg-blue-700 text-white rounded-full px-5 font-medium"
+                >
                     Get a Package
                 </Button>
 
