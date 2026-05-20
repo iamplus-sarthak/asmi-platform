@@ -1,5 +1,5 @@
-import { UnderDevelopmentSection } from "@/components/admin/sections/UnderDevelopmentSection";
+import { CounsellingsSection } from "@/components/admin/sections/CounsellingsSection";
 
 export default function CounsellingsPage() {
-    return <UnderDevelopmentSection title="Counsellings" />;
+    return <CounsellingsSection />;
 }

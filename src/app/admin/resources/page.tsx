@@ -1,5 +1,5 @@
-import { UnderDevelopmentSection } from "@/components/admin/sections/UnderDevelopmentSection";
+import { ResourcesSection } from "@/components/admin/sections/ResourcesSection";
 
 export default function ResourcesPage() {
-    return <UnderDevelopmentSection title="Resources" />;
+    return <ResourcesSection />;
 }

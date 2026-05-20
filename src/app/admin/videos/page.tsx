@@ -1,5 +1,5 @@
-import { UnderDevelopmentSection } from "@/components/admin/sections/UnderDevelopmentSection";
+import { VideosSection } from "@/components/admin/sections/VideosSection";
 
 export default function VideosPage() {
-    return <UnderDevelopmentSection title="Videos" />;
+    return <VideosSection />;
 }

@@ -37,6 +37,8 @@ import UserSubscriptions from './collections/UserSubscriptions'
 import Payments from './collections/Payments'
 import SubscriptionPermissions from './collections/SubscriptionPermissions'
 import Users from './collections/Users'
+import Videos from './collections/Videos'
+import Resources from './collections/Resources'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -97,6 +99,8 @@ export default buildConfig({
     UserSubscriptions,
     Payments,
     SubscriptionPermissions,
+    Videos,
+    Resources,
   ],
 
   editor: lexicalEditor(),
@@ -129,7 +133,7 @@ export default buildConfig({
     try {
       // Seed Roles
       const roles = ['admin', 'student'];
-      const roleIds: Record<string, string> = {};
+      const roleIds: Record<string, string | number> = {};
 
       for (const roleName of roles) {
         const existingRole = await payload.find({
@@ -170,7 +174,7 @@ export default buildConfig({
         payload.logger.info('Admin user seeded successfully with phone 0000000000.');
       }
     } catch (error) {
-      payload.logger.error('Error seeding database: ', error);
+      payload.logger.error({ err: error }, 'Error seeding database');
     }
   },
 })
