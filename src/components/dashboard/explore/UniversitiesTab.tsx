@@ -1,9 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { Search, Filter, Building2, MapPin, ChevronLeft, ChevronRight } from "lucide-react";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
+import { Building2, MapPin } from "lucide-react";
 import {
     Select,
     SelectContent,
@@ -11,7 +9,8 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select";
-import { cn } from "@/lib/utils";
+import { Pagination } from "@/components/ui/pagination";
+import { SearchBar } from "@/components/ui/search-bar";
 
 interface UniversitiesTabProps {
     onUniversityClick: (univ: any) => void;
@@ -67,18 +66,14 @@ export function UniversitiesTab({ onUniversityClick }: UniversitiesTabProps) {
         <div className="p-6 max-w-7xl mx-auto space-y-6">
             {/* Header Section */}
             <div className="bg-white rounded-2xl p-8 border border-slate-200 shadow-sm text-center space-y-6">
-                <h1 className="text-3xl font-bold text-slate-900">Universities</h1>
+                <h1 className="text-3xl font-bold text-slate-900">Explore Universities</h1>
 
                 <div className="max-w-2xl mx-auto space-y-4">
-                    <div className="relative">
-                        <Search className="absolute left-4 top-3.5 h-5 w-5 text-slate-400" />
-                        <Input
-                            value={searchQuery}
-                            onChange={(e) => setSearchQuery(e.target.value)}
-                            placeholder="Search universities..."
-                            className="pl-12 h-12 bg-slate-50 border-slate-200 focus-visible:ring-blue-500/20 text-base rounded-xl"
-                        />
-                    </div>
+                    <SearchBar
+                        value={searchQuery}
+                        onChange={setSearchQuery}
+                        placeholder="Search universities..."
+                    />
 
                     <div className="flex gap-4">
                         <Select value={selectedType} onValueChange={setSelectedType}>
@@ -153,51 +148,12 @@ export function UniversitiesTab({ onUniversityClick }: UniversitiesTabProps) {
             </div>
 
             {/* Pagination Controls */}
-            {totalPages > 1 && (
-                <div className="flex flex-col sm:flex-row items-center justify-between gap-4 bg-white border border-slate-200 rounded-2xl p-4 shadow-sm select-none">
-                    <span className="text-sm text-slate-500 font-medium">
-                        Showing Universities
-                    </span>
-
-                    <div className="flex items-center gap-2">
-                        <Button
-                            variant="outline"
-                            size="icon"
-                            disabled={currentPage === 1}
-                            onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
-                            className="h-9 w-9 rounded-xl border-slate-200 hover:border-slate-300 hover:bg-slate-50 text-slate-500 disabled:opacity-50 disabled:pointer-events-none transition-colors"
-                        >
-                            <ChevronLeft className="h-4 w-4" />
-                        </Button>
-
-                        {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-                            <Button
-                                key={page}
-                                variant={currentPage === page ? "default" : "outline"}
-                                onClick={() => setCurrentPage(page)}
-                                className={cn(
-                                    "h-9 min-w-9 px-2 rounded-xl font-medium text-sm transition-all",
-                                    currentPage === page
-                                        ? "bg-blue-600 hover:bg-blue-700 text-white shadow-sm shadow-blue-500/10"
-                                        : "border-slate-200 hover:border-slate-300 hover:bg-slate-50 text-slate-600"
-                                )}
-                            >
-                                {page}
-                            </Button>
-                        ))}
-
-                        <Button
-                            variant="outline"
-                            size="icon"
-                            disabled={currentPage === totalPages}
-                            onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
-                            className="h-9 w-9 rounded-xl border-slate-200 hover:border-slate-300 hover:bg-slate-50 text-slate-500 disabled:opacity-50 disabled:pointer-events-none transition-colors"
-                        >
-                            <ChevronRight className="h-4 w-4" />
-                        </Button>
-                    </div>
-                </div>
-            )}
+            <Pagination
+                currentPage={currentPage}
+                totalPages={totalPages}
+                onPageChange={setCurrentPage}
+                label="Showing Universities"
+            />
         </div>
     );
 }
