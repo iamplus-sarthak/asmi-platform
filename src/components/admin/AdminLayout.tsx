@@ -6,13 +6,24 @@ import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
-interface AdminSidebarProps {
-    activeSection: string;
-    onSectionChange: (section: string) => void;
-}
+import { usePathname, useRouter } from "next/navigation";
 
-export function AdminSidebar({ activeSection, onSectionChange }: AdminSidebarProps) {
+export function AdminSidebar() {
+    const pathname = usePathname();
+    const router = useRouter();
     const [expandedGroups, setExpandedGroups] = React.useState<string[]>(["data", "content"]);
+
+    // Determine the active section from the URL path.
+
+    const activeSection = pathname === "/admin" ? "dashboard" : pathname.split("/")[2] || "dashboard";
+
+    const handleSectionChange = (section: string) => {
+        if (section === "dashboard") {
+            router.push("/admin");
+        } else {
+            router.push(`/admin/${section}`);
+        }
+    };
 
     const toggleGroup = (group: string) => {
         setExpandedGroups(prev =>
@@ -80,7 +91,7 @@ export function AdminSidebar({ activeSection, onSectionChange }: AdminSidebarPro
     ];
 
     return (
-        <div className="w-64 bg-white border-r border-slate-200 flex flex-col h-full">
+        <div className="w-64 bg-white border-r border-slate-200 flex flex-col h-full shrink-0">
             {/* Logo */}
             <div className="p-6 border-b border-slate-200">
                 <div className="flex items-center gap-3">
@@ -116,7 +127,7 @@ export function AdminSidebar({ activeSection, onSectionChange }: AdminSidebarPro
                                         {item.children.map((child) => (
                                             <button
                                                 key={child.id}
-                                                onClick={() => onSectionChange(child.section)}
+                                                onClick={() => handleSectionChange(child.section)}
                                                 className={cn(
                                                     "w-full flex items-center px-3 py-2 text-sm rounded-lg transition-colors",
                                                     activeSection === child.section
@@ -136,7 +147,7 @@ export function AdminSidebar({ activeSection, onSectionChange }: AdminSidebarPro
                     return (
                         <button
                             key={item.id}
-                            onClick={() => item.section && onSectionChange(item.section)}
+                            onClick={() => item.section && handleSectionChange(item.section)}
                             className={cn(
                                 "w-full flex items-center justify-between px-3 py-2.5 text-sm font-medium rounded-lg transition-colors",
                                 activeSection === item.section
@@ -160,6 +171,9 @@ export function AdminSidebar({ activeSection, onSectionChange }: AdminSidebarPro
         </div>
     );
 }
+
+
+
 
 export function AdminTopNav() {
     return (
