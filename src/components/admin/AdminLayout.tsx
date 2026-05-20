@@ -44,6 +44,7 @@ export function AdminSidebar() {
             icon: Database,
             isGroup: true,
             children: [
+                { id: "academic-years", label: "Academic Years", section: "academic-years" },
                 { id: "pdf-parser", label: "PDF Parser", section: "pdf-parser" },
                 { id: "allotments", label: "Allotment Data", section: "allotments" },
                 { id: "closing-ranks", label: "Closing Ranks", section: "closing-ranks" },
@@ -57,17 +58,54 @@ export function AdminSidebar() {
             isGroup: true,
             children: [
                 { id: "universities", label: "Universities", section: "universities" },
-                { id: "institutes", label: "Institutes", section: "institutes" },
-                { id: "counsellings", label: "Counsellings", section: "counsellings" },
+                {
+                    id: "exams-group",
+                    label: "Exams & Courses",
+                    isSubGroup: true,
+                    children: [
+                        { id: "exams", label: "Entrance Exams", section: "exams" },
+                        { id: "courses", label: "Master Courses", section: "courses" },
+                        { id: "exam-courses", label: "Mapped Courses", section: "exam-courses" },
+                    ]
+                },
+                {
+                    id: "institutes-group",
+                    label: "Institutes",
+                    isSubGroup: true,
+                    children: [
+                        { id: "institutes", label: "All Institutes", section: "institutes" },
+                        { id: "institute-types", label: "Institute Types", section: "institute-types" },
+                        { id: "institute-courses", label: "Courses", section: "institute-courses" },
+                        { id: "institute-fees", label: "Course Fees", section: "institute-course-fees" },
+                        { id: "institute-hospitals", label: "Hospitals", section: "institute-hospitals" },
+                        { id: "institute-hostels", label: "Hostels", section: "institute-hostels" },
+                    ]
+                },
+                {
+                    id: "counsellings-group",
+                    label: "Counsellings",
+                    isSubGroup: true,
+                    children: [
+                        { id: "counsellings", label: "All Counsellings", section: "counsellings" },
+                        { id: "counselling-quotas", label: "Quotas", section: "counselling-quotas" },
+                        { id: "counselling-timelines", label: "Timelines", section: "counselling-timelines" },
+                        { id: "counselling-cycles", label: "Cycles", section: "counselling-cycles" },
+                        { id: "counselling-institutes", label: "Mapped Institutes", section: "counselling-institutes" },
+                    ]
+                },
                 { id: "videos", label: "Videos", section: "videos" },
                 { id: "resources", label: "Resources", section: "resources" },
             ]
         },
         {
-            id: "announcements",
+            id: "announcements-group",
             label: "Announcements",
             icon: Megaphone,
-            section: "announcements"
+            isGroup: true,
+            children: [
+                { id: "general-announcements", label: "General", section: "announcements" },
+                { id: "counselling-announcements", label: "Counselling Updates", section: "counselling-announcements" },
+            ]
         },
         {
             id: "subscriptions",
@@ -117,27 +155,62 @@ export function AdminSidebar() {
                                     className="w-full flex items-center justify-between px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 rounded-lg transition-colors"
                                 >
                                     <div className="flex items-center gap-3">
-                                        <item.icon className="h-4 w-4" />
+                                        {item.icon && <item.icon className="h-4 w-4" />}
                                         <span>{item.label}</span>
                                     </div>
                                     <ChevronDown className={cn("h-4 w-4 transition-transform", isExpanded && "rotate-180")} />
                                 </button>
                                 {isExpanded && item.children && (
                                     <div className="ml-4 mt-1 space-y-1">
-                                        {item.children.map((child) => (
-                                            <button
-                                                key={child.id}
-                                                onClick={() => handleSectionChange(child.section)}
-                                                className={cn(
-                                                    "w-full flex items-center px-3 py-2 text-sm rounded-lg transition-colors",
-                                                    activeSection === child.section
-                                                        ? "bg-blue-50 text-blue-600 font-medium"
-                                                        : "text-slate-600 hover:bg-slate-50"
-                                                )}
-                                            >
-                                                {child.label}
-                                            </button>
-                                        ))}
+                                        {item.children.map((child: any) => {
+                                            if (child.isSubGroup) {
+                                                const isSubExpanded = expandedGroups.includes(child.id);
+                                                return (
+                                                    <div key={child.id}>
+                                                        <button
+                                                            onClick={() => toggleGroup(child.id)}
+                                                            className="w-full flex items-center justify-between px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 rounded-lg transition-colors"
+                                                        >
+                                                            <span>{child.label}</span>
+                                                            <ChevronDown className={cn("h-3 w-3 transition-transform", isSubExpanded && "rotate-180")} />
+                                                        </button>
+                                                        {isSubExpanded && child.children && (
+                                                            <div className="ml-2 mt-1 space-y-1 border-l border-slate-200 pl-2">
+                                                                {child.children.map((subChild: any) => (
+                                                                    <button
+                                                                        key={subChild.id}
+                                                                        onClick={() => handleSectionChange(subChild.section)}
+                                                                        className={cn(
+                                                                            "w-full flex items-center px-3 py-1.5 text-xs rounded-lg transition-colors",
+                                                                            activeSection === subChild.section
+                                                                                ? "bg-blue-50 text-blue-600 font-medium"
+                                                                                : "text-slate-600 hover:bg-slate-50"
+                                                                        )}
+                                                                    >
+                                                                        {subChild.label}
+                                                                    </button>
+                                                                ))}
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                )
+                                            }
+
+                                            return (
+                                                <button
+                                                    key={child.id}
+                                                    onClick={() => handleSectionChange(child.section)}
+                                                    className={cn(
+                                                        "w-full flex items-center px-3 py-2 text-sm rounded-lg transition-colors",
+                                                        activeSection === child.section
+                                                            ? "bg-blue-50 text-blue-600 font-medium"
+                                                            : "text-slate-600 hover:bg-slate-50"
+                                                    )}
+                                                >
+                                                    {child.label}
+                                                </button>
+                                            )
+                                        })}
                                     </div>
                                 )}
                             </div>

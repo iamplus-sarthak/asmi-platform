@@ -1,5 +1,5 @@
-import { UnderDevelopmentSection } from "@/components/admin/sections/UnderDevelopmentSection";
+import { InstitutesSection } from "@/components/admin/sections/InstitutesSection";
 
 export default function InstitutesPage() {
-    return <UnderDevelopmentSection title="Institutes" />;
+    return <InstitutesSection />;
 }
