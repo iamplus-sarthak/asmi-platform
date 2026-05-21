@@ -95,6 +95,12 @@ export async function verifyOtpAction(mobile: string, otp: string) {
             data: { is_used: true },
         });
 
+        await payload.update({
+            collection: 'users',
+            id: user.id,
+            data: { last_login_at: new Date().toISOString() } as any,
+        });
+
         const roleName = typeof user.roleid === 'object' && user.roleid !== null
             ? (user.roleid as any).name?.toLowerCase()
             : 'student';

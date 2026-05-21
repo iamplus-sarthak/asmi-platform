@@ -50,6 +50,13 @@ const Counsellings: CollectionConfig = {
       type: 'text',
       label: 'Registration URL',
     },
+    {
+      name: 'views',
+      type: 'number',
+      defaultValue: 0,
+      label: 'Total Views',
+      admin: { readOnly: true },
+    },
   ],
 }
 

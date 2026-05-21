@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Outfit } from "next/font/google";
 import "./globals.css";
 import { AuthProvider } from "@/components/AuthProvider";
+import { AnalyticsTracker } from "@/components/AnalyticsTracker";
 import { getSessionAction } from "@/actions/auth";
 
 const outfit = Outfit({
@@ -26,6 +27,7 @@ export default async function RootLayout({
       <body
         className={`${outfit.variable} antialiased`}
       >
+        <AnalyticsTracker />
         <AuthProvider initialUser={user}>
           {children}
         </AuthProvider>

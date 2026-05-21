@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import { getDocsAction, getDocByIdAction } from "@/actions/admin-crud";
+import { recordEngagementAction } from "@/actions/analytics";
 
 interface InstituteDetailTabProps {
     institute: {
@@ -44,6 +45,9 @@ export function InstituteDetailTab({ institute }: InstituteDetailTabProps) {
                 const instRes = await getDocByIdAction({ collection: "institutes", id: institute.id });
                 if (instRes.success && instRes.data) {
                     setInstDetails(instRes.data);
+                    
+                    // Fire-and-forget record view
+                    recordEngagementAction("institutes", institute.id, "view").catch(console.error);
                 }
 
                 // Fetch Address Info

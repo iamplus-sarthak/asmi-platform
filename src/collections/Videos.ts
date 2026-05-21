@@ -36,6 +36,13 @@ const Videos: CollectionConfig = {
       label: 'Is Published',
       defaultValue: true,
     },
+    {
+      name: 'views',
+      type: 'number',
+      defaultValue: 0,
+      label: 'Total Views',
+      admin: { readOnly: true },
+    },
   ],
 }
 

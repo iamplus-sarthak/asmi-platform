@@ -42,6 +42,8 @@ import Videos from './collections/Videos'
 import Resources from './collections/Resources'
 import PromoCodes from './collections/PromoCodes'
 import SupportTickets from './collections/SupportTickets'
+import Sessions from './collections/Sessions'
+import PlatformAnalytics from './globals/PlatformAnalytics'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -107,9 +109,11 @@ export default buildConfig({
     Resources,
     PromoCodes,
     SupportTickets,
+    Sessions,
   ],
 
   editor: lexicalEditor(),
+  globals: [PlatformAnalytics],
 
   secret: process.env.PAYLOAD_SECRET || '',
 

@@ -55,6 +55,13 @@ const Resources: CollectionConfig = {
       label: 'Is Published',
       defaultValue: true,
     },
+    {
+      name: 'downloads',
+      type: 'number',
+      defaultValue: 0,
+      label: 'Total Downloads',
+      admin: { readOnly: true },
+    },
   ],
 }
 

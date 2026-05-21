@@ -77,6 +77,13 @@ const Institutes: CollectionConfig = {
       type: 'text',
       label: 'Cover URL',
     },
+    {
+      name: 'views',
+      type: 'number',
+      defaultValue: 0,
+      label: 'Total Views',
+      admin: { readOnly: true },
+    },
   ],
 }
 

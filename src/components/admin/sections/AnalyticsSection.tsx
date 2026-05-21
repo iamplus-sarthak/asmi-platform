@@ -1,36 +1,57 @@
 "use client";
 
-import React from "react";
-import { Users, TrendingUp, Eye, DollarSign, ArrowUp, ArrowDown } from "lucide-react";
+import React, { useState, useEffect } from "react";
+import { Users, TrendingUp, Eye, DollarSign, ArrowUp, ArrowDown, Loader2 } from "lucide-react";
 import { Card } from "@/components/ui/card";
+import { getAnalyticsDataAction } from "@/actions/admin";
 
 export function AnalyticsSection() {
-    const userMetrics = [
-        { label: "Total Users", value: "12,458", change: "+12.5%", trend: "up" },
-        { label: "Active Today", value: "3,234", change: "+8.2%", trend: "up" },
-        { label: "New This Week", value: "456", change: "+15.3%", trend: "up" },
-        { label: "Retention Rate", value: "78.4%", change: "-2.1%", trend: "down" },
-    ];
+    const [data, setData] = useState<any>(null);
+    const [isLoading, setIsLoading] = useState(true);
 
-    const contentMetrics = [
-        { label: "Most Viewed Institute", value: "AIIMS Delhi", views: "2,345" },
-        { label: "Popular Counselling", value: "NEET UG 2025", views: "8,901" },
-        { label: "Top Video", value: "How to Fill Choices", views: "5,678" },
-        { label: "Most Downloaded", value: "Seat Matrix PDF", downloads: "1,234" },
-    ];
+    useEffect(() => {
+        getAnalyticsDataAction().then(res => {
+            if (res.success) {
+                setData(res.data);
+            }
+            setIsLoading(false);
+        }).catch(err => {
+            console.error(err);
+            setIsLoading(false);
+        });
+    }, []);
 
-    const revenueData = [
-        { month: "Jan", revenue: "₹3,45,000", subscriptions: 234 },
-        { month: "Feb", revenue: "₹4,12,000", subscriptions: 289 },
-        { month: "Mar", revenue: "₹4,52,890", subscriptions: 312 },
-    ];
+    if (isLoading) {
+        return (
+            <div className="flex-1 h-full flex items-center justify-center min-h-[600px]">
+                <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
+            </div>
+        );
+    }
 
-    const toolUsage = [
-        { tool: "Allotment Mapping", uses: 1234, percentage: 45 },
-        { tool: "Rank Scan", uses: 987, percentage: 36 },
-        { tool: "Closing Ranks", uses: 456, percentage: 17 },
-        { tool: "Seat Matrix", uses: 234, percentage: 9 },
-    ];
+    const userMetrics = data ? [
+        { label: "Total Users", value: data.users.total.toLocaleString(), change: data.users.totalChange || "+0%", trend: data.users.totalTrend || "up", period: "vs last month" },
+        { label: "Active Today", value: data.users.activeToday.toLocaleString(), change: data.users.activeChange || "+0%", trend: data.users.activeTrend || "up", period: "vs yesterday" },
+        { label: "New This Week", value: data.users.newThisWeek.toLocaleString(), change: data.users.newWeekChange || "+0%", trend: data.users.newWeekTrend || "up", period: "vs last week" },
+        { 
+            label: "Retention Rate", 
+            value: `${data.users?.retentionRate || 0}%`, 
+            change: data.users?.retentionChange || "+0%", 
+            trend: data.users?.retentionTrend || "up",
+            period: "vs last month"
+        },
+    ] : [];
+
+    const contentMetrics = data ? [
+        { label: "Most Viewed Institute", value: data.content.topInstitute?.name || "N/A", views: data.content.topInstitute?.views || 0 },
+        { label: "Popular Counselling", value: data.content.topCounselling?.name || "N/A", views: data.content.topCounselling?.views || 0 },
+        { label: "Top Video", value: data.content.topVideo?.title || "N/A", views: data.content.topVideo?.views || 0 },
+        { label: "Most Downloaded", value: data.content.topResource?.title || "N/A", downloads: data.content.topResource?.downloads || 0 },
+    ] : [];
+
+    const revenueData = data?.revenue?.length ? data.revenue : [];
+
+    const toolUsage = data?.platform?.tool_usage?.length ? data.platform.tool_usage : [];
 
     return (
         <div className="p-8 space-y-6">
@@ -56,7 +77,7 @@ export function AnalyticsSection() {
                                 <span className={`text-sm font-medium ${metric.trend === "up" ? "text-green-600" : "text-red-600"}`}>
                                     {metric.change}
                                 </span>
-                                <span className="text-sm text-slate-500">vs last month</span>
+                                <span className="text-sm text-slate-500">{metric.period}</span>
                             </div>
                         </Card>
                     ))}
@@ -75,8 +96,8 @@ export function AnalyticsSection() {
                             </div>
                             <h4 className="font-semibold text-slate-900 mb-1">{metric.value}</h4>
                             <p className="text-sm text-slate-600">
-                                {metric.views && `${metric.views} views`}
-                                {metric.downloads && `${metric.downloads} downloads`}
+                                {metric.views !== undefined && `${metric.views.toLocaleString()} views`}
+                                {metric.downloads !== undefined && `${metric.downloads.toLocaleString()} downloads`}
                             </p>
                         </Card>
                     ))}
@@ -88,18 +109,22 @@ export function AnalyticsSection() {
                 <Card className="p-6 border-slate-200">
                     <h3 className="text-lg font-bold text-slate-900 mb-4">Revenue Trends</h3>
                     <div className="space-y-4">
-                        {revenueData.map((data, index) => (
-                            <div key={index} className="flex items-center justify-between p-4 rounded-lg bg-slate-50">
-                                <div>
-                                    <p className="text-sm text-slate-500">{data.month} 2025</p>
-                                    <p className="text-lg font-bold text-slate-900">{data.revenue}</p>
+                        {revenueData.length === 0 ? (
+                            <p className="text-slate-500 text-sm">No revenue data available.</p>
+                        ) : (
+                            revenueData.map((rev: any, index: number) => (
+                                <div key={index} className="flex items-center justify-between p-4 rounded-lg bg-slate-50">
+                                    <div>
+                                        <p className="text-sm text-slate-500">{rev.month} {new Date().getFullYear()}</p>
+                                        <p className="text-lg font-bold text-slate-900">{rev.revenue}</p>
+                                    </div>
+                                    <div className="text-right">
+                                        <p className="text-sm text-slate-500">Subscriptions</p>
+                                        <p className="text-lg font-semibold text-blue-600">{rev.subscriptions}</p>
+                                    </div>
                                 </div>
-                                <div className="text-right">
-                                    <p className="text-sm text-slate-500">Subscriptions</p>
-                                    <p className="text-lg font-semibold text-blue-600">{data.subscriptions}</p>
-                                </div>
-                            </div>
-                        ))}
+                            ))
+                        )}
                     </div>
                 </Card>
 
@@ -107,20 +132,24 @@ export function AnalyticsSection() {
                 <Card className="p-6 border-slate-200">
                     <h3 className="text-lg font-bold text-slate-900 mb-4">Tool Usage</h3>
                     <div className="space-y-4">
-                        {toolUsage.map((tool, index) => (
-                            <div key={index}>
-                                <div className="flex items-center justify-between mb-2">
-                                    <span className="text-sm font-medium text-slate-900">{tool.tool}</span>
-                                    <span className="text-sm text-slate-600">{tool.uses} uses</span>
+                        {toolUsage.length === 0 ? (
+                            <p className="text-slate-500 text-sm">No tool usage data available.</p>
+                        ) : (
+                            toolUsage.map((tool: any, index: number) => (
+                                <div key={index}>
+                                    <div className="flex items-center justify-between mb-2">
+                                        <span className="text-sm font-medium text-slate-900">{tool.tool}</span>
+                                        <span className="text-sm text-slate-600">{tool.uses.toLocaleString()} uses</span>
+                                    </div>
+                                    <div className="w-full bg-slate-100 rounded-full h-2">
+                                        <div
+                                            className="bg-blue-600 h-2 rounded-full transition-all"
+                                            style={{ width: `${tool.percentage}%` }}
+                                        />
+                                    </div>
                                 </div>
-                                <div className="w-full bg-slate-100 rounded-full h-2">
-                                    <div
-                                        className="bg-blue-600 h-2 rounded-full transition-all"
-                                        style={{ width: `${tool.percentage}%` }}
-                                    />
-                                </div>
-                            </div>
-                        ))}
+                            ))
+                        )}
                     </div>
                 </Card>
             </div>
@@ -131,15 +160,15 @@ export function AnalyticsSection() {
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                     <div className="text-center p-6 rounded-lg bg-blue-50">
                         <p className="text-sm text-blue-600 font-medium mb-2">Avg. Session Duration</p>
-                        <p className="text-3xl font-bold text-blue-900">12m 34s</p>
+                        <p className="text-3xl font-bold text-blue-900">{data?.platform?.avg_session_duration || "0m 0s"}</p>
                     </div>
                     <div className="text-center p-6 rounded-lg bg-green-50">
                         <p className="text-sm text-green-600 font-medium mb-2">Pages Per Session</p>
-                        <p className="text-3xl font-bold text-green-900">8.4</p>
+                        <p className="text-3xl font-bold text-green-900">{data?.platform?.pages_per_session || "0"}</p>
                     </div>
                     <div className="text-center p-6 rounded-lg bg-purple-50">
                         <p className="text-sm text-purple-600 font-medium mb-2">Bounce Rate</p>
-                        <p className="text-3xl font-bold text-purple-900">23.5%</p>
+                        <p className="text-3xl font-bold text-purple-900">{data?.platform?.bounce_rate || "0"}%</p>
                     </div>
                 </div>
             </Card>

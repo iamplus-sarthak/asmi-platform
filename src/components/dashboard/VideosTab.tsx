@@ -5,6 +5,7 @@ import { Search, PlayCircle, Bookmark } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { getDocsAction } from "@/actions/admin-crud";
+import { recordEngagementAction } from "@/actions/analytics";
 
 interface VideoItem {
     id: string;
@@ -139,6 +140,7 @@ export function VideosTab() {
                                 href={vid.url}
                                 target="_blank"
                                 rel="noopener noreferrer"
+                                onClick={() => recordEngagementAction("videos", vid.id, "view").catch(console.error)}
                                 className="group bg-white rounded-2xl border border-slate-200 overflow-hidden hover:shadow-lg hover:border-blue-200 transition-all flex flex-col"
                             >
                                 <div className="aspect-video bg-slate-900 relative">
