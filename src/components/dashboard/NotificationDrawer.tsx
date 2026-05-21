@@ -39,7 +39,7 @@ export function NotificationDrawer({ isOpen, onClose, onUnreadChange }: Notifica
                         let uiType: "info" | "success" | "warning" = "info";
                         if (a.announcement_type === "event") uiType = "success";
                         if (a.announcement_type === "quick") uiType = "warning";
-                        
+
                         const dateObj = new Date(a.createdAt || new Date());
 
                         return {
@@ -51,8 +51,8 @@ export function NotificationDrawer({ isOpen, onClose, onUnreadChange }: Notifica
                             type: uiType
                         };
                     });
-                    
-                    // Sort descending by date (though API should do it, ensuring here)
+
+
                     setNotifications(mapped);
                 }
             } catch (err) {
