@@ -7,7 +7,6 @@ const Announcements: CollectionConfig = {
     description: 'General system announcements and updates',
     group: 'Content Management',
   },
-
   fields: [
     {
       name: 'title',

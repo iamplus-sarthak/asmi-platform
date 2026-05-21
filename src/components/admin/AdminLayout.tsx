@@ -5,8 +5,10 @@ import { LayoutDashboard, Database, FileText, Megaphone, CreditCard, Headphones,
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-
 import { usePathname, useRouter } from "next/navigation";
+import Link from "next/link";
+import { useAuthStore } from "@/store/useAuthStore";
+import { AdminNotificationDrawer } from "./AdminNotificationDrawer";
 
 export function AdminSidebar() {
     const pathname = usePathname();
@@ -266,33 +268,54 @@ export function AdminSidebar() {
 
 
 export function AdminTopNav() {
+    const { user } = useAuthStore();
+    const [isNotificationOpen, setIsNotificationOpen] = React.useState(false);
+    const [unreadCount, setUnreadCount] = React.useState(0);
+
     return (
-        <div className="h-16 bg-white border-b border-slate-200 flex items-center justify-between px-6">
-            <div className="flex-1 max-w-xl">
-                <div className="relative">
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
-                    <Input
-                        placeholder="Search anything..."
-                        className="pl-10 bg-slate-50 border-slate-200 focus-visible:ring-blue-500/20 focus-visible:border-blue-500"
-                    />
+        <>
+            <div className="h-16 bg-white border-b border-slate-200 flex items-center justify-between px-6">
+                <div className="flex-1 max-w-xl">
+                    <div className="relative">
+                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+                        <Input
+                            placeholder="Search anything..."
+                            className="pl-10 bg-slate-50 border-slate-200 focus-visible:ring-blue-500/20 focus-visible:border-blue-500"
+                        />
+                    </div>
+                </div>
+
+                <div className="flex items-center gap-4">
+                    <Button 
+                        variant="ghost" 
+                        size="icon" 
+                        className="relative"
+                        onClick={() => setIsNotificationOpen(true)}
+                    >
+                        <Bell className="h-5 w-5 text-slate-600" />
+                        {unreadCount > 0 && (
+                            <span className="absolute top-1 right-1 h-2 w-2 bg-red-500 rounded-full" />
+                        )}
+                    </Button>
+                    <div className="flex items-center gap-3 pl-4 border-l border-slate-200">
+                        <div className="text-right">
+                            <p className="text-sm font-medium text-slate-900">Admin User</p>
+                            <p className="text-xs text-slate-500">{user?.phone_number || "Administrator"}</p>
+                        </div>
+                        <Link href="/admin/profile">
+                            <div className="h-9 w-9 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-full flex items-center justify-center hover:shadow-md transition-shadow cursor-pointer">
+                                <User className="h-5 w-5 text-white" />
+                            </div>
+                        </Link>
+                    </div>
                 </div>
             </div>
 
-            <div className="flex items-center gap-4">
-                <Button variant="ghost" size="icon" className="relative">
-                    <Bell className="h-5 w-5 text-slate-600" />
-                    <span className="absolute top-1 right-1 h-2 w-2 bg-red-500 rounded-full" />
-                </Button>
-                <div className="flex items-center gap-3 pl-4 border-l border-slate-200">
-                    <div className="text-right">
-                        <p className="text-sm font-medium text-slate-900">Admin User</p>
-                        <p className="text-xs text-slate-500">admin@asmi.com</p>
-                    </div>
-                    <div className="h-9 w-9 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-full flex items-center justify-center">
-                        <User className="h-5 w-5 text-white" />
-                    </div>
-                </div>
-            </div>
-        </div>
+            <AdminNotificationDrawer 
+                isOpen={isNotificationOpen}
+                onClose={() => setIsNotificationOpen(false)}
+                onUnreadChange={setUnreadCount}
+            />
+        </>
     );
 }

@@ -43,20 +43,16 @@ import Resources from './collections/Resources'
 import PromoCodes from './collections/PromoCodes'
 import SupportTickets from './collections/SupportTickets'
 import Sessions from './collections/Sessions'
+import AdminActivityLogs from './collections/AdminActivityLogs'
+import AdminTasks from './collections/AdminTasks'
 import PlatformAnalytics from './globals/PlatformAnalytics'
+
+import { activityLogHook, activityLogDeleteHook } from './collections/hooks/activityLogHook'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
-export default buildConfig({
-  admin: {
-    user: 'users',
-    importMap: {
-      baseDir: path.resolve(dirname),
-    },
-  },
-
-  collections: [
+const rawCollections = [
     Users,
     {
       slug: 'media',
@@ -110,7 +106,33 @@ export default buildConfig({
     PromoCodes,
     SupportTickets,
     Sessions,
-  ],
+    AdminActivityLogs,
+    AdminTasks,
+  ] as any[];
+
+const collectionsWithHooks = rawCollections.map((col) => {
+  // Skip attaching hook to the activity logs collection itself and sessions
+  if (col.slug === 'admin_activity_logs' || col.slug === 'sessions') return col;
+
+  return {
+    ...col,
+    hooks: {
+      ...col.hooks,
+      afterChange: [...(col.hooks?.afterChange || []), activityLogHook],
+      afterDelete: [...(col.hooks?.afterDelete || []), activityLogDeleteHook]
+    }
+  };
+});
+
+export default buildConfig({
+  admin: {
+    user: 'users',
+    importMap: {
+      baseDir: path.resolve(dirname),
+    },
+  },
+
+  collections: collectionsWithHooks,
 
   editor: lexicalEditor(),
   globals: [PlatformAnalytics],

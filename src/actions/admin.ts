@@ -178,3 +178,250 @@ export async function getAnalyticsDataAction() {
         return { error: 'Failed to fetch analytics data' };
     }
 }
+
+export async function getDashboardDataAction() {
+    try {
+        const payload = await getLocalPayload();
+        
+        const now = new Date();
+        const startOfThisMonth = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
+        const startOfLastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1).toISOString();
+        const endOfLastMonth = new Date(now.getFullYear(), now.getMonth(), 0, 23, 59, 59, 999).toISOString();
+
+        // Helper to calculate percentage change
+        const calcChange = (current: number, previous: number) => {
+            if (previous === 0) return current > 0 ? 100 : 0;
+            return Number((((current - previous) / previous) * 100).toFixed(1));
+        };
+
+        // 1. Total Students
+        const students = await payload.find({ collection: 'students', limit: 1 });
+        const studentsLastMonth = await payload.find({ 
+            collection: 'students', 
+            where: { createdAt: { less_than_equal: endOfLastMonth } }, 
+            limit: 1 
+        });
+        const studentsChange = calcChange(students.totalDocs, studentsLastMonth.totalDocs);
+
+        // 2. Active Subscriptions
+        const activeSubs = await payload.find({ collection: 'user_subscriptions', where: { status: { equals: 'active' } }, limit: 1 });
+        const activeSubsLastMonth = await payload.find({ 
+            collection: 'user_subscriptions', 
+            where: { status: { equals: 'active' }, createdAt: { less_than_equal: endOfLastMonth } }, 
+            limit: 1 
+        });
+        const subsChange = calcChange(activeSubs.totalDocs, activeSubsLastMonth.totalDocs);
+
+        // 3. Monthly Revenue
+        const thisMonthPayments = await payload.find({ 
+            collection: 'payments', 
+            where: { status: { equals: 'success' }, createdAt: { greater_than_equal: startOfThisMonth } }, 
+            limit: 1000 
+        });
+        const lastMonthPayments = await payload.find({ 
+            collection: 'payments', 
+            where: { status: { equals: 'success' }, createdAt: { greater_than_equal: startOfLastMonth, less_than_equal: endOfLastMonth } }, 
+            limit: 1000 
+        });
+        const monthlyRevenue = thisMonthPayments.docs.reduce((sum, p: any) => sum + (p.amount || 0), 0);
+        const lastMonthRevenue = lastMonthPayments.docs.reduce((sum, p: any) => sum + (p.amount || 0), 0);
+        const revenueChange = calcChange(monthlyRevenue, lastMonthRevenue);
+
+        // 4. Support Tickets (All)
+        const openTickets = await payload.find({ 
+            collection: 'support_tickets', 
+            limit: 1 
+        });
+        // For tickets, change is often based on how many were created this month vs last month, rather than active count.
+        const ticketsThisMonth = await payload.find({ 
+            collection: 'support_tickets', 
+            where: { createdAt: { greater_than_equal: startOfThisMonth } }, 
+            limit: 1 
+        });
+        const ticketsLastMonth = await payload.find({ 
+            collection: 'support_tickets', 
+            where: { createdAt: { greater_than_equal: startOfLastMonth, less_than_equal: endOfLastMonth } }, 
+            limit: 1 
+        });
+        const ticketsChange = calcChange(ticketsThisMonth.totalDocs, ticketsLastMonth.totalDocs);
+
+        // 5. Recent Activity
+        const recentActivity = await payload.find({
+            collection: 'admin_activity_logs',
+            sort: '-createdAt',
+            limit: 5,
+        });
+
+        // 6. Pending Tasks
+        const pendingTasks = await payload.find({
+            collection: 'admin_tasks',
+            where: { is_completed: { equals: false } },
+            sort: '-createdAt',
+            limit: 10,
+        });
+
+        // 7. Format Open Tickets as Tasks to unify the workflow
+        const openTicketsTasks = await payload.find({
+            collection: 'support_tickets',
+            where: { or: [{ status: { equals: 'open' } }, { status: { equals: 'in_progress' } }] },
+            sort: '-createdAt',
+            limit: 10,
+        });
+
+        const mergedTasks = [
+            ...pendingTasks.docs.map((t: any) => ({
+                id: t.id,
+                task: t.task,
+                priority: t.priority || 'medium',
+                type: 'admin_task'
+            })),
+            ...openTicketsTasks.docs.map((t: any) => ({
+                id: t.id,
+                task: `Resolve Support Ticket: ${t.subject || 'No Subject'}`,
+                priority: t.priority === 'urgent' ? 'high' : t.priority || 'medium',
+                type: 'support_ticket'
+            }))
+        ];
+
+        // Add TimeAgo helper
+        const timeAgo = (dateStr: string) => {
+            const diff = Math.floor((new Date().getTime() - new Date(dateStr).getTime()) / 1000);
+            if (diff < 60) return `${diff} seconds ago`;
+            if (diff < 3600) return `${Math.floor(diff / 60)} minutes ago`;
+            if (diff < 86400) return `${Math.floor(diff / 3600)} hours ago`;
+            return `${Math.floor(diff / 86400)} days ago`;
+        };
+
+        const formattedActivity = recentActivity.docs.map((log: any) => ({
+            action: log.action,
+            user: log.user_name,
+            time: timeAgo(log.createdAt),
+        }));
+
+        return {
+            success: true,
+            stats: {
+                totalStudents: students.totalDocs,
+                studentsChange: studentsChange,
+                activeSubscriptions: activeSubs.totalDocs,
+                subsChange: subsChange,
+                monthlyRevenue: `₹${monthlyRevenue.toLocaleString('en-IN')}`,
+                revenueChange: revenueChange,
+                supportTickets: openTickets.totalDocs,
+                ticketsChange: ticketsChange,
+            },
+            recentActivity: formattedActivity,
+            pendingTasks: mergedTasks,
+        };
+    } catch (error) {
+        console.error('Failed to get dashboard data:', error);
+        return { success: false, error: 'Failed to fetch dashboard data' };
+    }
+}
+
+export async function toggleAdminTaskAction(taskId: string, isCompleted: boolean, type: string = 'admin_task') {
+    try {
+        const payload = await getLocalPayload();
+        
+        if (type === 'support_ticket') {
+            await payload.update({
+                collection: 'support_tickets',
+                id: taskId,
+                data: { status: isCompleted ? 'resolved' : 'in_progress' } as any,
+            });
+        } else {
+            await payload.update({
+                collection: 'admin_tasks',
+                id: taskId,
+                data: { is_completed: isCompleted } as any,
+            });
+        }
+        
+        return { success: true };
+    } catch (error) {
+        console.error('Failed to toggle task:', error);
+        return { success: false, error: 'Failed to toggle task' };
+    }
+}
+
+export async function getAdminNotificationsAction() {
+    try {
+        const payload = await getLocalPayload();
+        
+        // 1. Unread/Open Support Tickets
+        const tickets = await payload.find({
+            collection: 'support_tickets',
+            where: { status: { not_equals: 'closed' } },
+            sort: '-createdAt',
+            limit: 5,
+        });
+
+        // 2. Pending Admin Tasks
+        const tasks = await payload.find({
+            collection: 'admin_tasks',
+            where: { is_completed: { equals: false } },
+            sort: '-createdAt',
+            limit: 5,
+        });
+
+        // 3. Recent Subscriptions
+        const subscriptions = await payload.find({
+            collection: 'user_subscriptions',
+            where: { status: { equals: 'active' } },
+            sort: '-createdAt',
+            limit: 5,
+        });
+
+        const notifications: any[] = [];
+
+        tickets.docs.forEach((t: any) => {
+            notifications.push({
+                id: `ticket-${t.id}`,
+                title: `Support Ticket: ${t.subject || 'Open'}`,
+                description: 'Needs your attention',
+                time: new Date(t.createdAt).toISOString(),
+                isRead: false,
+                type: 'warning',
+                link: `/admin/collections/support_tickets/${t.id}`
+            });
+        });
+
+        tasks.docs.forEach((t: any) => {
+            notifications.push({
+                id: `task-${t.id}`,
+                title: 'Pending Task',
+                description: t.task,
+                time: new Date(t.createdAt).toISOString(),
+                isRead: false,
+                type: 'info',
+                link: `/admin/dashboard` // Tasks are on dashboard
+            });
+        });
+
+        subscriptions.docs.forEach((s: any) => {
+            notifications.push({
+                id: `sub-${s.id}`,
+                title: 'New Subscription Bought',
+                description: `A user has purchased a subscription plan.`,
+                time: new Date(s.createdAt).toISOString(),
+                isRead: false,
+                type: 'success',
+                link: `/admin/collections/user_subscriptions/${s.id}`
+            });
+        });
+
+        // Sort combined notifications by date descending
+        notifications.sort((a, b) => new Date(b.time).getTime() - new Date(a.time).getTime());
+
+        // Format time to readable string
+        const formattedNotifications = notifications.slice(0, 15).map(n => ({
+            ...n,
+            time: new Date(n.time).toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })
+        }));
+
+        return { success: true, data: formattedNotifications };
+    } catch (error) {
+        console.error('Failed to fetch admin notifications:', error);
+        return { success: false, error: 'Failed to fetch admin notifications' };
+    }
+}
