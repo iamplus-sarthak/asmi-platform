@@ -220,3 +220,22 @@ export const resourceSchema = z.object({
 });
 
 export type ResourceFormValues = z.infer<typeof resourceSchema>;
+
+export const subscriptionPlanSchema = z.object({
+    name: z.string().min(1, 'Plan Name is required'),
+    price: z.coerce.number().min(0, 'Price must be 0 or greater'),
+    duration_days: z.coerce.number().min(1, 'Duration must be at least 1 day'),
+    description: z.string().optional(),
+    is_active: z.boolean().default(true),
+});
+export type SubscriptionPlanFormValues = z.infer<typeof subscriptionPlanSchema>;
+
+export const promoCodeSchema = z.object({
+    code: z.string().min(3, 'Promo Code must be at least 3 characters'),
+    discount_type: z.enum(['percentage', 'fixed']),
+    discount_value: z.coerce.number().min(0, 'Discount must be 0 or greater'),
+    usage_limit: z.coerce.number().optional(),
+    expiry_date: z.string().optional(),
+    is_active: z.boolean().default(true),
+});
+export type PromoCodeFormValues = z.infer<typeof promoCodeSchema>;

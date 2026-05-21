@@ -40,6 +40,7 @@ import SubscriptionPermissions from './collections/SubscriptionPermissions'
 import Users from './collections/Users'
 import Videos from './collections/Videos'
 import Resources from './collections/Resources'
+import PromoCodes from './collections/PromoCodes'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -103,6 +104,7 @@ export default buildConfig({
     SubscriptionPermissions,
     Videos,
     Resources,
+    PromoCodes,
   ],
 
   editor: lexicalEditor(),
