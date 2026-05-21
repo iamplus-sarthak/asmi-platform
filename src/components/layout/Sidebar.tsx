@@ -21,7 +21,8 @@ import {
     Building2,
     Landmark,
     GraduationCap,
-    Sparkles
+    Sparkles,
+    LifeBuoy
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -113,6 +114,12 @@ export function Sidebar({ onNavigate }: SidebarProps) {
             label: "Resources",
             icon: BookOpen,
             path: "/dashboard/resources",
+            type: "link"
+        },
+        {
+            label: "Help & Support",
+            icon: LifeBuoy,
+            path: "/dashboard/support",
             type: "link"
         },
     ];

@@ -41,6 +41,7 @@ import Users from './collections/Users'
 import Videos from './collections/Videos'
 import Resources from './collections/Resources'
 import PromoCodes from './collections/PromoCodes'
+import SupportTickets from './collections/SupportTickets'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -105,6 +106,7 @@ export default buildConfig({
     Videos,
     Resources,
     PromoCodes,
+    SupportTickets,
   ],
 
   editor: lexicalEditor(),
