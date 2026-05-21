@@ -21,32 +21,49 @@ interface NotificationDrawerProps {
 }
 
 export function NotificationDrawer({ isOpen, onClose, onUnreadChange }: NotificationDrawerProps) {
-    const [notifications, setNotifications] = useState<Notification[]>([
-        {
-            id: "1",
-            title: "Profile Setup Complete! 🎉",
-            description: "Your academic profile has been linked to the PostgreSQL database successfully.",
-            time: "Just now",
-            isRead: false,
-            type: "success",
-        },
-        {
-            id: "2",
-            title: "Welcome to Asmi Platform",
-            description: "Start exploring cutoff tools and allotment predictors tailored for you.",
-            time: "2 hours ago",
-            isRead: false,
-            type: "info",
-        },
-        {
-            id: "3",
-            title: "Complete Eligibility Verification",
-            description: "Upload state-level details to unlock more personalized counselling predicting tools.",
-            time: "1 day ago",
-            isRead: true,
-            type: "warning",
-        },
-    ]);
+    const [notifications, setNotifications] = useState<Notification[]>([]);
+    const [isLoading, setIsLoading] = useState(true);
+
+    useEffect(() => {
+        const fetchAnnouncements = async () => {
+            try {
+                const { getDocsAction } = await import("@/actions/admin-crud");
+                const res = await getDocsAction({
+                    collection: "announcements",
+                    query: { status: { equals: "published" } },
+                    limit: 20
+                });
+
+                if (res.success && res.data?.docs) {
+                    const mapped = res.data.docs.map((a: any) => {
+                        let uiType: "info" | "success" | "warning" = "info";
+                        if (a.announcement_type === "event") uiType = "success";
+                        if (a.announcement_type === "quick") uiType = "warning";
+                        
+                        const dateObj = new Date(a.createdAt || new Date());
+
+                        return {
+                            id: a.id,
+                            title: a.title,
+                            description: a.message,
+                            time: dateObj.toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }),
+                            isRead: false,
+                            type: uiType
+                        };
+                    });
+                    
+                    // Sort descending by date (though API should do it, ensuring here)
+                    setNotifications(mapped);
+                }
+            } catch (err) {
+                console.error("Failed to fetch announcements:", err);
+            } finally {
+                setIsLoading(false);
+            }
+        };
+
+        fetchAnnouncements();
+    }, []);
 
     // Calculate unread count and trigger callback
     const unreadCount = notifications.filter((n) => !n.isRead).length;
