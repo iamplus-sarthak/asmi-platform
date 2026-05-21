@@ -15,6 +15,7 @@ import CounsellingCycles from './collections/CounsellingCycles'
 import CounsellingQuotas from './collections/CounsellingQuotas'
 import CounsellingTimelines from './collections/CounsellingTimelines'
 import CounsellingAnnouncements from './collections/CounsellingAnnouncements'
+import Announcements from './collections/Announcements'
 import InstituteTypes from './collections/InstituteTypes'
 import Institutes from './collections/Institutes'
 import CounsellingInstitutes from './collections/CounsellingInstitutes'
@@ -78,6 +79,7 @@ export default buildConfig({
     CounsellingQuotas,
     CounsellingTimelines,
     CounsellingAnnouncements,
+    Announcements,
     InstituteTypes,
     Institutes,
     CounsellingInstitutes,

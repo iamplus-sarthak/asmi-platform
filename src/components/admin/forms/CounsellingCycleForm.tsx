@@ -21,7 +21,7 @@ interface CounsellingCycleFormProps {
 
 export function CounsellingCycleForm({ initialData, counsellings, academicYears, onSubmit, isSubmitting }: CounsellingCycleFormProps) {
   const form = useForm<CounsellingCycleFormValues>({
-    resolver: zodResolver(counsellingCycleSchema),
+    resolver: zodResolver(counsellingCycleSchema) as any,
     defaultValues: {
       counselling_id: initialData?.counselling_id?.id || initialData?.counselling_id || "",
       academic_year_id: initialData?.academic_year_id?.id || initialData?.academic_year_id || "",

@@ -102,6 +102,17 @@ export const counsellingAnnouncementSchema = z.object({
 });
 export type CounsellingAnnouncementFormValues = z.infer<typeof counsellingAnnouncementSchema>;
 
+export const announcementSchema = z.object({
+    title: z.string().min(1, 'Title is required'),
+    message: z.string().min(1, 'Message is required'),
+    announcement_type: z.enum(['quick', 'event', 'general']),
+    target_audience: z.enum(['all', 'neet', 'jee']),
+    status: z.enum(['published', 'draft', 'scheduled']),
+    scheduled_date: z.string().optional(),
+});
+export type AnnouncementFormValues = z.infer<typeof announcementSchema>;
+
+
 export const counsellingTimelineSchema = z.object({
     counselling_id: z.union([z.string().min(1, 'Counselling is required'), z.number()]),
     title: z.string().min(1, 'Title is required'),
