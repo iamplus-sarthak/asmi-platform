@@ -11,33 +11,81 @@ import {
 } from "@/components/ui/select";
 import { Pagination } from "@/components/ui/pagination";
 import { SearchBar } from "@/components/ui/search-bar";
+import { getDocsAction } from "@/actions/admin-crud";
 
 interface UniversitiesTabProps {
     onUniversityClick: (univ: any) => void;
 }
 
-const mockUniversities = [
-    { id: 1, name: "Maharashtra University of Health Sciences, Nashik", state: "Maharashtra", type: "State Govt University", count: 98 },
-    { id: 2, name: "Rajiv Gandhi University of Health Sciences", state: "Karnataka", type: "State Govt University", count: 145 },
-    { id: 3, name: "All India Institute of Medical Sciences (AIIMS)", state: "Delhi", type: "Central Autonomous", count: 20 },
-    { id: 4, name: "Dr. M.G.R. Medical University", state: "Tamil Nadu", type: "State Govt University", count: 112 },
-    { id: 5, name: "Gujarat University", state: "Gujarat", type: "State Govt University", count: 45 },
-    { id: 6, name: "NTR University of Health Sciences", state: "Andhra Pradesh", type: "State Govt University", count: 80 },
-    { id: 7, name: "Kaloji Narayana Rao University of Health Sciences", state: "Telangana", type: "State Govt University", count: 65 },
-    { id: 8, name: "King George's Medical University", state: "Uttar Pradesh", type: "State Govt University", count: 70 },
-    { id: 9, name: "West Bengal University of Health Sciences", state: "West Bengal", type: "State Govt University", count: 85 },
-    { id: 10, name: "Baba Farid University of Health Sciences", state: "Punjab", type: "State Govt University", count: 50 },
-    { id: 11, name: "Banaras Hindu University (BHU)", state: "Uttar Pradesh", type: "Central Autonomous", count: 15 },
-    { id: 12, name: "JIPMER", state: "Puducherry", type: "Central Autonomous", count: 12 }
-];
-
-const ITEMS_PER_PAGE = 3; // Standard batch size to demonstrate pagination
+const ITEMS_PER_PAGE = 10;
 
 export function UniversitiesTab({ onUniversityClick }: UniversitiesTabProps) {
     const [searchQuery, setSearchQuery] = useState("");
     const [selectedType, setSelectedType] = useState("all");
     const [selectedState, setSelectedState] = useState("all");
     const [currentPage, setCurrentPage] = useState(1);
+    
+    const [universitiesList, setUniversitiesList] = useState<any[]>([]);
+    const [statesList, setStatesList] = useState<any[]>([]);
+    const [isLoading, setIsLoading] = useState(true);
+
+    useEffect(() => {
+        const fetchData = async () => {
+            try {
+                const [univRes, stateRes, instRes] = await Promise.all([
+                    getDocsAction({ collection: "universities", limit: 250 }),
+                    getDocsAction({ collection: "states", limit: 100 }),
+                    getDocsAction({ collection: "institutes", limit: 500 }),
+                ]);
+
+                if (stateRes.success && stateRes.data?.docs) {
+                    setStatesList(stateRes.data.docs);
+                }
+
+                if (univRes.success && univRes.data?.docs && univRes.data.docs.length > 0) {
+                    const insts = instRes.success && instRes.data?.docs ? instRes.data.docs : [];
+                    
+                    // Count institutes per university
+                    const countMap: Record<string | number, number> = {};
+                    insts.forEach((inst: any) => {
+                        const uniId = typeof inst.university_id === "object" ? inst.university_id?.id : inst.university_id;
+                        if (uniId) {
+                            countMap[uniId] = (countMap[uniId] || 0) + 1;
+                        }
+                    });
+
+                    const mapped = univRes.data.docs.map((u: any) => {
+                        const uTypeMap: Record<string, string> = {
+                            central: "Central Autonomous",
+                            deemed: "Deemed University",
+                            state_govt: "State Govt University",
+                            state_private: "State Private University",
+                        };
+
+                        const stateName = typeof u.state_id === "object" ? u.state_id?.name : u.state_id;
+                        
+                        return {
+                            id: u.id,
+                            name: u.name,
+                            state: stateName || "Unknown State",
+                            type: uTypeMap[u.university_type] || u.university_type,
+                            count: countMap[u.id] || 0,
+                            rawType: u.university_type,
+                            rawStateId: typeof u.state_id === "object" ? u.state_id?.id : u.state_id,
+                        };
+                    });
+
+                    setUniversitiesList(mapped);
+                }
+            } catch (error) {
+                console.error("Failed to fetch universities data:", error);
+            } finally {
+                setIsLoading(false);
+            }
+        };
+
+        fetchData();
+    }, []);
 
     // Reset back to page 1 whenever any filter or search query changes
     useEffect(() => {
@@ -45,12 +93,19 @@ export function UniversitiesTab({ onUniversityClick }: UniversitiesTabProps) {
     }, [searchQuery, selectedType, selectedState]);
 
     // Dynamic filtering logic
-    const filteredUniversities = mockUniversities.filter((univ) => {
+    const filteredUniversities = universitiesList.filter((univ) => {
         const matchesSearch = univ.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
                               univ.state.toLowerCase().includes(searchQuery.toLowerCase());
         
-        const matchesType = selectedType === "all" || univ.type === selectedType;
-        const matchesState = selectedState === "all" || univ.state === selectedState;
+        // Match raw type value or mapped type string
+        const matchesType = selectedType === "all" || 
+                            univ.rawType === selectedType || 
+                            univ.type === selectedType;
+
+        // Match state ID or state name
+        const matchesState = selectedState === "all" || 
+                             String(univ.rawStateId) === selectedState || 
+                             univ.state === selectedState;
         
         return matchesSearch && matchesType && matchesState;
     });
@@ -61,6 +116,33 @@ export function UniversitiesTab({ onUniversityClick }: UniversitiesTabProps) {
     const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
     const endIndex = startIndex + ITEMS_PER_PAGE;
     const paginatedUniversities = filteredUniversities.slice(startIndex, endIndex);
+
+    if (isLoading) {
+        return (
+            <div className="p-6 max-w-7xl mx-auto space-y-6">
+                <div className="bg-white rounded-2xl p-8 border border-slate-200 shadow-sm text-center space-y-6 animate-pulse">
+                    <div className="h-8 bg-slate-200 rounded-full w-1/3 mx-auto" />
+                    <div className="h-11 bg-slate-100 rounded-xl max-w-2xl mx-auto" />
+                    <div className="flex gap-4 max-w-2xl mx-auto">
+                        <div className="h-11 bg-slate-100 rounded-xl flex-1" />
+                        <div className="h-11 bg-slate-100 rounded-xl flex-1" />
+                    </div>
+                </div>
+                <div className="grid gap-4">
+                    {[1, 2, 3].map((i) => (
+                        <div key={i} className="bg-white rounded-xl p-4 border border-slate-200 flex items-center gap-6 animate-pulse">
+                            <div className="h-12 w-12 bg-slate-200 rounded-lg" />
+                            <div className="flex-1 space-y-2">
+                                <div className="h-5 bg-slate-200 rounded-full w-2/3" />
+                                <div className="h-4 bg-slate-100 rounded-full w-1/3" />
+                            </div>
+                            <div className="h-6 w-20 bg-slate-100 rounded-full hidden md:block" />
+                        </div>
+                    ))}
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className="p-6 max-w-7xl mx-auto space-y-6">
@@ -77,27 +159,39 @@ export function UniversitiesTab({ onUniversityClick }: UniversitiesTabProps) {
 
                     <div className="flex gap-4">
                         <Select value={selectedType} onValueChange={setSelectedType}>
-                            <SelectTrigger className="h-11 bg-white border-slate-200 rounded-xl flex-1">
+                            <SelectTrigger className="h-11 bg-white border-slate-200 rounded-xl flex-1 text-slate-700">
                                 <SelectValue placeholder="University Type" />
                             </SelectTrigger>
-                            <SelectContent>
+                            <SelectContent className="bg-white border-slate-200 text-slate-700">
                                 <SelectItem value="all">All Types</SelectItem>
-                                <SelectItem value="State Govt University">State Govt University</SelectItem>
-                                <SelectItem value="Central Autonomous">Central Autonomous</SelectItem>
+                                <SelectItem value="central">Central Autonomous</SelectItem>
+                                <SelectItem value="deemed">Deemed University</SelectItem>
+                                <SelectItem value="state_govt">State Govt University</SelectItem>
+                                <SelectItem value="state_private">State Private University</SelectItem>
                             </SelectContent>
                         </Select>
 
                         <Select value={selectedState} onValueChange={setSelectedState}>
-                            <SelectTrigger className="h-11 bg-white border-slate-200 rounded-xl flex-1">
+                            <SelectTrigger className="h-11 bg-white border-slate-200 rounded-xl flex-1 text-slate-700">
                                 <SelectValue placeholder="State" />
                             </SelectTrigger>
-                            <SelectContent>
+                            <SelectContent className="bg-white border-slate-200 text-slate-700">
                                 <SelectItem value="all">All States</SelectItem>
-                                <SelectItem value="Maharashtra">Maharashtra</SelectItem>
-                                <SelectItem value="Karnataka">Karnataka</SelectItem>
-                                <SelectItem value="Delhi">Delhi</SelectItem>
-                                <SelectItem value="Tamil Nadu">Tamil Nadu</SelectItem>
-                                <SelectItem value="Gujarat">Gujarat</SelectItem>
+                                {statesList.map((state) => (
+                                    <SelectItem key={state.id} value={String(state.id)}>
+                                        {state.name}
+                                    </SelectItem>
+                                ))}
+                                {/* Fallback states just in case */}
+                                {statesList.length === 0 && (
+                                    <>
+                                        <SelectItem value="Maharashtra">Maharashtra</SelectItem>
+                                        <SelectItem value="Karnataka">Karnataka</SelectItem>
+                                        <SelectItem value="Delhi">Delhi</SelectItem>
+                                        <SelectItem value="Tamil Nadu">Tamil Nadu</SelectItem>
+                                        <SelectItem value="Gujarat">Gujarat</SelectItem>
+                                    </>
+                                )}
                             </SelectContent>
                         </Select>
                     </div>
