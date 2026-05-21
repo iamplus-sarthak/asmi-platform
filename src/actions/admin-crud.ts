@@ -10,11 +10,13 @@ export async function getDocsAction({
     page = 1,
     limit = 10,
     query = {},
+    depth,
 }: {
     collection: any;
     page?: number;
     limit?: number;
     query?: Record<string, any>;
+    depth?: number;
 }) {
     try {
         const payload = await getLocalPayload();
@@ -23,6 +25,7 @@ export async function getDocsAction({
             page,
             limit,
             where: query,
+            ...(depth !== undefined && { depth }),
         });
         return { success: true, data };
     } catch (error) {
@@ -34,15 +37,18 @@ export async function getDocsAction({
 export async function getDocByIdAction({
     collection,
     id,
+    depth,
 }: {
     collection: any;
     id: string | number;
+    depth?: number;
 }) {
     try {
         const payload = await getLocalPayload();
         const data = await payload.findByID({
             collection,
             id,
+            ...(depth !== undefined && { depth }),
         });
         return { success: true, data };
     } catch (error) {

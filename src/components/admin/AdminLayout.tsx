@@ -12,6 +12,23 @@ export function AdminSidebar() {
     const pathname = usePathname();
     const router = useRouter();
     const [expandedGroups, setExpandedGroups] = React.useState<string[]>(["data", "content"]);
+    const [unreadSupportCount, setUnreadSupportCount] = React.useState<number>(0);
+
+    React.useEffect(() => {
+        import("@/actions/admin-crud").then(({ getDocsAction }) => {
+            getDocsAction({
+                collection: "support_tickets",
+                query: { is_read_admin: { equals: false }, status: { not_equals: "closed" } },
+                limit: 1
+            }).then((res) => {
+                if (res.success && res.data?.totalDocs) {
+                    setUnreadSupportCount(res.data.totalDocs);
+                } else if (res.success && res.data?.docs) {
+                    setUnreadSupportCount(res.data.docs.length);
+                }
+            }).catch(console.error);
+        });
+    }, []);
 
     // Determine the active section from the URL path.
 
@@ -118,7 +135,7 @@ export function AdminSidebar() {
             label: "Support",
             icon: Headphones,
             section: "support",
-            badge: "12"
+            badge: unreadSupportCount > 0 ? unreadSupportCount.toString() : undefined
         },
         {
             id: "analytics",

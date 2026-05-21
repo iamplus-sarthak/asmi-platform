@@ -239,3 +239,17 @@ export const promoCodeSchema = z.object({
     is_active: z.boolean().default(true),
 });
 export type PromoCodeFormValues = z.infer<typeof promoCodeSchema>;
+
+export const supportTicketSchema = z.object({
+    subject: z.string().min(1, 'Subject is required'),
+    priority: z.enum(['low', 'medium', 'high', 'urgent']),
+    status: z.enum(['open', 'in_progress', 'resolved', 'closed']).optional(),
+    message: z.string().min(1, 'Initial message is required'),
+});
+export type SupportTicketFormValues = z.infer<typeof supportTicketSchema>;
+
+export const supportTicketMessageSchema = z.object({
+    message: z.string().min(1, 'Message is required'),
+    is_internal: z.boolean().default(false),
+});
+export type SupportTicketMessageFormValues = z.infer<typeof supportTicketMessageSchema>;
