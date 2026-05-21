@@ -61,22 +61,13 @@ const getTabFromSlug = (slugArr?: string[]): Tab => {
     // Handle deep linked detail views
     if (primaryRoute === "universities" && slugArr.length > 1) {
         const univId = slugArr[1];
-        // Basic lookup for mock universities so direct reload retains information
-        const mockUniversities = [
-            { id: 1, name: "Maharashtra University of Health Sciences, Nashik", state: "Maharashtra", type: "State Govt University", count: 98 },
-            { id: 2, name: "Rajiv Gandhi University of Health Sciences", state: "Karnataka", type: "State Govt University", count: 145 },
-            { id: 3, name: "All India Institute of Medical Sciences (AIIMS)", state: "Delhi", type: "Central Autonomous", count: 20 },
-            { id: 4, name: "Dr. M.G.R. Medical University", state: "Tamil Nadu", type: "State Govt University", count: 112 },
-            { id: 5, name: "Gujarat University", state: "Gujarat", type: "State Govt University", count: 45 },
-        ];
-        const univ = mockUniversities.find(u => u.id.toString() === univId || `univ-${u.id}` === univId);
         return {
             id: `univ-${univId}`,
-            label: univ ? univ.name : "University Detail",
+            label: "University Detail",
             icon: Landmark,
             pinned: false,
             type: "university-detail",
-            data: univ || { id: univId, name: "University Detail" }
+            data: { id: univId, name: "University Detail" }
         };
     }
 
