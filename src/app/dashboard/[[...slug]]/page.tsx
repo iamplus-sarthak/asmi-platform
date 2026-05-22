@@ -15,6 +15,7 @@ import { InstitutesTab } from "@/components/dashboard/explore/InstitutesTab";
 import { InstituteDetailTab } from "@/components/dashboard/explore/InstituteDetailTab";
 import { CounsellingsTab } from "@/components/dashboard/explore/CounsellingsTab";
 import { CounsellingDetailTab } from "@/components/dashboard/explore/CounsellingDetailTab";
+import { CoursesTab } from "@/components/dashboard/explore/CoursesTab";
 import { VideosTab } from "@/components/dashboard/VideosTab";
 import { ResourcesTab } from "@/components/dashboard/ResourcesTab";
 import { HomeContent } from "@/components/dashboard/HomeContent";
@@ -37,7 +38,7 @@ interface Tab {
     label: string;
     icon: any;
     pinned: boolean;
-    type: "home" | "universities" | "university-detail" | "institutes" | "institute-detail" | "counsellings" | "counselling-detail" | "videos" | "resources" | "allotments" | "closing-ranks" | "seat-matrix" | "fee-stipend" | "allotment-mapping" | "rank-scan" | "profile" | "blogs-news" | "packages" | "support" | "placeholder";
+    type: "home" | "universities" | "university-detail" | "institutes" | "institute-detail" | "counsellings" | "counselling-detail" | "courses" | "videos" | "resources" | "allotments" | "closing-ranks" | "seat-matrix" | "fee-stipend" | "allotment-mapping" | "rank-scan" | "profile" | "blogs-news" | "packages" | "support" | "placeholder";
     data?: any;
 }
 
@@ -103,6 +104,8 @@ const getTabFromSlug = (slugArr?: string[]): Tab => {
             return { id: "institutes", label: "Institutes", icon: Building2, pinned: false, type: "institutes" };
         case "counsellings":
             return { id: "counsellings", label: "Counsellings", icon: GraduationCap, pinned: false, type: "counsellings" };
+        case "courses":
+            return { id: "courses", label: "Courses", icon: BookOpen, pinned: false, type: "courses" };
         case "videos":
             return { id: "videos", label: "Videos", icon: PlayCircle, pinned: false, type: "videos" };
         case "resources":
@@ -272,6 +275,10 @@ export default function DashboardClient() {
 
                     {activeTab.type === "counselling-detail" && (
                         <CounsellingDetailTab counselling={activeTab.data} />
+                    )}
+
+                    {activeTab.type === "courses" && (
+                        <CoursesTab />
                     )}
 
                     {activeTab.type === "videos" && (
