@@ -253,3 +253,45 @@ export const supportTicketMessageSchema = z.object({
     is_internal: z.boolean().default(false),
 });
 export type SupportTicketMessageFormValues = z.infer<typeof supportTicketMessageSchema>;
+
+// --- Data Management Schemas ---
+
+export const allotmentSchema = z.object({
+    year: z.string().min(1, 'Year is required'),
+    round_no: z.coerce.number().min(1, 'Round is required'),
+    counselling_id: z.union([z.string().min(1, 'Counselling is required'), z.number()]),
+    institute_id: z.union([z.string().min(1, 'Institute is required'), z.number()]),
+    institute_course_id: z.union([z.string().min(1, 'Institute Course is required'), z.number()]),
+    quota_id: z.union([z.string().min(1, 'Quota is required'), z.number()]),
+    category: z.string().optional(),
+    ai_rank: z.coerce.number().optional(),
+    state_rank: z.coerce.number().optional(),
+    admission_status_id: z.union([z.string(), z.number()]).optional(),
+});
+export type AllotmentFormValues = z.infer<typeof allotmentSchema>;
+
+export const closingRankSchema = z.object({
+    academic_year_id: z.union([z.string().min(1, 'Academic year is required'), z.number()]),
+    counselling_id: z.union([z.string().min(1, 'Counselling is required'), z.number()]),
+    institute_id: z.union([z.string().min(1, 'Institute is required'), z.number()]),
+    institute_course_id: z.union([z.string().min(1, 'Institute Course is required'), z.number()]),
+    quota_id: z.union([z.string().min(1, 'Quota is required'), z.number()]),
+    category: z.string().min(1, 'Category is required'),
+    round_no: z.coerce.number().min(1, 'Round number is required'),
+    closing_rank: z.coerce.number().min(1, 'Closing rank is required'),
+    closing_score: z.coerce.number().optional(),
+});
+export type ClosingRankFormValues = z.infer<typeof closingRankSchema>;
+
+export const seatMatrixSchema = z.object({
+    academic_year_id: z.union([z.string().min(1, 'Academic year is required'), z.number()]),
+    counselling_id: z.union([z.string().min(1, 'Counselling is required'), z.number()]),
+    institute_id: z.union([z.string().min(1, 'Institute is required'), z.number()]),
+    institute_course_id: z.union([z.string().min(1, 'Institute Course is required'), z.number()]),
+    quota_id: z.union([z.string().min(1, 'Quota is required'), z.number()]),
+    category: z.string().min(1, 'Category is required'),
+    round_no: z.coerce.number().min(1, 'Round number is required'),
+    total_seats: z.coerce.number().min(0, 'Total seats must be >= 0'),
+    seats_remarks: z.string().optional(),
+});
+export type SeatMatrixFormValues = z.infer<typeof seatMatrixSchema>;

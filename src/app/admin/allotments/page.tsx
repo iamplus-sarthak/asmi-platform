@@ -1,5 +1,5 @@
-import { UnderDevelopmentSection } from "@/components/admin/sections/UnderDevelopmentSection";
+import { AllotmentsSection } from "@/components/admin/sections/AllotmentsSection";
 
 export default function AllotmentsPage() {
-    return <UnderDevelopmentSection title="Allotment Data" />;
+    return <AllotmentsSection />;
 }

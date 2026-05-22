@@ -1,18 +1,36 @@
 "use client";
 
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { InsightsTableLayout, TableRow } from "./InsightsTableLayout";
+import { getFeesAction } from "@/actions/student-insights";
+import { Loader2 } from "lucide-react";
 
 export function FeeStipendBondTab() {
     const columns = [
         "STATE", "INSTITUTE", "COURSE", "QUOTA", "FEE", "BEDS", "BOND YEARS", "BOND PENALTY", "STIPEND YEAR 1"
     ];
 
-    const data = [
-        ["Delhi", "ESI, Basaidarpur, Delhi", "MBBS", "AI", "₹1,00,000*", "Info Not Available", "1", "₹5,00,000", "₹26,300"],
-        ["Uttar Pradesh", "ESIC MedCollHosp, Noida", "MBBS", "AI", "₹1,00,000*", "Info Not Available", "1", "₹5,00,000", "₹26,300"],
-        ["Gujarat", "ESIC Med Coll, Naroda", "MBBS", "AI", "₹1,00,000*", "Info Not Available", "1", "₹5,00,000", "₹26,300"],
-    ];
+    const [data, setData] = useState<any[]>([]);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        const fetchFees = async () => {
+            const res = await getFeesAction();
+            if (res.success && res.data) {
+                setData(res.data);
+            }
+            setLoading(false);
+        };
+        fetchFees();
+    }, []);
+
+    if (loading) {
+        return (
+            <div className="flex-1 flex items-center justify-center p-12">
+                <Loader2 className="w-8 h-8 animate-spin text-blue-600" />
+            </div>
+        );
+    }
 
     return (
         <InsightsTableLayout title="Fee, Stipend and Bond" columns={columns}>

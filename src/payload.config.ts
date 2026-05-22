@@ -45,6 +45,8 @@ import SupportTickets from './collections/SupportTickets'
 import Sessions from './collections/Sessions'
 import AdminActivityLogs from './collections/AdminActivityLogs'
 import AdminTasks from './collections/AdminTasks'
+import ClosingRanks from './collections/ClosingRanks'
+import SeatMatrix from './collections/SeatMatrix'
 import PlatformAnalytics from './globals/PlatformAnalytics'
 
 import { activityLogHook, activityLogDeleteHook } from './collections/hooks/activityLogHook'
@@ -92,6 +94,8 @@ const rawCollections = [
     InstituteCourseFees,
     AdmissionStatus,
     Allotments,
+    ClosingRanks,
+    SeatMatrix,
     Roles,
     Students,
     Permissions,

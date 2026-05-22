@@ -1,5 +1,5 @@
-import { UnderDevelopmentSection } from "@/components/admin/sections/UnderDevelopmentSection";
+import { SeatMatrixSection } from "@/components/admin/sections/SeatMatrixSection";
 
 export default function SeatMatrixPage() {
-    return <UnderDevelopmentSection title="Seat Matrix" />;
+    return <SeatMatrixSection />;
 }

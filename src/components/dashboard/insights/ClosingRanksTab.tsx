@@ -1,18 +1,36 @@
 "use client";
 
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { InsightsTableLayout, TableRow } from "./InsightsTableLayout";
+import { getClosingRanksAction } from "@/actions/student-insights";
+import { Loader2 } from "lucide-react";
 
 export function ClosingRanksTab() {
     const columns = [
-        "QUOTA", "CATEGORY", "STATE", "INSTITUTE", "COURSE", "FEE", "BEDS", "BOND YEARS", "BOND PENALTY", "STIPEND YEAR 1", "CR 2022 1", "CR 2022 2"
+        "ROUND", "INSTITUTE", "COURSE", "QUOTA", "CATEGORY", "CLOSING RANK", "CLOSING SCORE"
     ];
 
-    const data = [
-        ["AIIMS SO", "Open", "Delhi", "AIIMS, New Delhi", "MBBS", "₹1,350*", "3194", "0", "₹0", "₹30,700", "55(48)", "61(48)"],
-        ["AI", "Open", "Delhi", "MAMC, New Delhi", "MBBS", "₹2,095*", "2800", "1", "₹15,00,000", "₹23,000", "91(14)", "107(14)"],
-        ["AI", "Open", "Delhi", "VMMC, New Delhi", "MBBS", "₹41,000*", "1550", "1", "₹15,00,000", "₹26,300", "129(10)", "129(10)"],
-    ];
+    const [data, setData] = useState<any[]>([]);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        const fetchClosingRanks = async () => {
+            const res = await getClosingRanksAction();
+            if (res.success && res.data) {
+                setData(res.data);
+            }
+            setLoading(false);
+        };
+        fetchClosingRanks();
+    }, []);
+
+    if (loading) {
+        return (
+            <div className="flex-1 flex items-center justify-center p-12">
+                <Loader2 className="w-8 h-8 animate-spin text-blue-600" />
+            </div>
+        );
+    }
 
     return (
         <InsightsTableLayout title="Closing Ranks" columns={columns}>
