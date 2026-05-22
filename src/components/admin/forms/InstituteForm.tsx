@@ -372,18 +372,22 @@ export function InstituteForm({
                     <FormLabel className="block mb-2">Logo Upload</FormLabel>
                     <div className="flex items-center gap-4">
                     <Input type="file" accept="image/*" onChange={(e) => setLogoFile(e.target.files?.[0] || null)} />
-                    {form.watch("logo_url") && !logoFile && (
-                        <span className="text-xs text-green-600 font-medium whitespace-nowrap">Current logo present</span>
-                    )}
+                    {logoFile ? (
+                        <img src={URL.createObjectURL(logoFile)} alt="Logo Preview" className="h-12 w-12 rounded-full object-cover border border-slate-200 shrink-0" />
+                    ) : form.watch("logo_url") ? (
+                        <img src={form.watch("logo_url")} alt="Current Logo" className="h-12 w-12 rounded-full object-cover border border-slate-200 shrink-0" />
+                    ) : null}
                     </div>
                 </div>
                 <div>
                     <FormLabel className="block mb-2">Cover Image Upload</FormLabel>
                     <div className="flex items-center gap-4">
                     <Input type="file" accept="image/*" onChange={(e) => setCoverFile(e.target.files?.[0] || null)} />
-                    {form.watch("cover_url") && !coverFile && (
-                        <span className="text-xs text-green-600 font-medium whitespace-nowrap">Current cover present</span>
-                    )}
+                    {coverFile ? (
+                        <img src={URL.createObjectURL(coverFile)} alt="Cover Preview" className="h-12 w-20 rounded-md object-cover border border-slate-200 shrink-0" />
+                    ) : form.watch("cover_url") ? (
+                        <img src={form.watch("cover_url")} alt="Current Cover" className="h-12 w-20 rounded-md object-cover border border-slate-200 shrink-0" />
+                    ) : null}
                     </div>
                 </div>
             </div>
@@ -532,9 +536,11 @@ export function InstituteForm({
                             <div className="space-y-2">
                                 <FormLabel>Upload Image</FormLabel>
                                 <Input type="file" accept="image/*" onChange={(e) => handleImageFileChange(index, e.target.files?.[0] || null)} />
-                                {form.watch(`images.${index}.image_url`) && !imageFiles[index] && (
-                                    <span className="text-xs text-green-600 font-medium">Image uploaded</span>
-                                )}
+                                {imageFiles[index] ? (
+                                    <img src={URL.createObjectURL(imageFiles[index])} alt="Preview" className="h-10 w-16 rounded-md object-cover border border-slate-200" />
+                                ) : form.watch(`images.${index}.image_url`) ? (
+                                    <img src={form.watch(`images.${index}.image_url`)} alt="Current" className="h-10 w-16 rounded-md object-cover border border-slate-200" />
+                                ) : null}
                             </div>
                         </div>
                     </CardContent>
