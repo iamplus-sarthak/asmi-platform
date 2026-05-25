@@ -7,6 +7,33 @@ import { getDocsAction } from "@/actions/admin-crud";
 export const HomeContent = () => {
     const [quickUpdates, setQuickUpdates] = useState<any[]>([]);
     const [events, setEvents] = useState<any[]>([]);
+    const [stats, setStats] = useState({ counsellings: 0, institutes: 0, videos: 0, resources: 0 });
+    const [isLoadingStats, setIsLoadingStats] = useState(true);
+
+    useEffect(() => {
+        const fetchStats = async () => {
+            try {
+                const [counsRes, instRes, vidRes, resRes] = await Promise.all([
+                    getDocsAction({ collection: 'counsellings', limit: 1 }),
+                    getDocsAction({ collection: 'institutes', limit: 1 }),
+                    getDocsAction({ collection: 'videos', limit: 1 }),
+                    getDocsAction({ collection: 'resources', limit: 1 })
+                ]);
+                
+                setStats({
+                    counsellings: counsRes.success ? counsRes.data?.totalDocs || 0 : 0,
+                    institutes: instRes.success ? instRes.data?.totalDocs || 0 : 0,
+                    videos: vidRes.success ? vidRes.data?.totalDocs || 0 : 0,
+                    resources: resRes.success ? resRes.data?.totalDocs || 0 : 0,
+                });
+            } catch (err) {
+                console.error("Failed to load stats", err);
+            } finally {
+                setIsLoadingStats(false);
+            }
+        };
+        fetchStats();
+    }, []);
 
     useEffect(() => {
         const fetchAnnouncements = async () => {
@@ -44,7 +71,9 @@ export const HomeContent = () => {
                         <GraduationCap className="h-6 w-6 text-white" />
                     </div>
                 </div>
-                <h3 className="text-2xl font-bold text-slate-900">42+</h3>
+                <h3 className="text-2xl font-bold text-slate-900">
+                    {isLoadingStats ? "..." : stats.counsellings > 0 ? stats.counsellings + "+" : "0"}
+                </h3>
                 <p className="text-sm text-slate-600 font-medium">Counsellings Available</p>
             </div>
 
@@ -54,7 +83,9 @@ export const HomeContent = () => {
                         <Building2 className="h-6 w-6 text-white" />
                     </div>
                 </div>
-                <h3 className="text-2xl font-bold text-slate-900">2000+</h3>
+                <h3 className="text-2xl font-bold text-slate-900">
+                    {isLoadingStats ? "..." : stats.institutes > 0 ? stats.institutes + "+" : "0"}
+                </h3>
                 <p className="text-sm text-slate-600 font-medium">Institutes</p>
             </div>
 
@@ -64,7 +95,9 @@ export const HomeContent = () => {
                         <PlayCircle className="h-6 w-6 text-white" />
                     </div>
                 </div>
-                <h3 className="text-2xl font-bold text-slate-900">150+</h3>
+                <h3 className="text-2xl font-bold text-slate-900">
+                    {isLoadingStats ? "..." : stats.videos > 0 ? stats.videos + "+" : "0"}
+                </h3>
                 <p className="text-sm text-slate-600 font-medium">Video Guides</p>
             </div>
 
@@ -74,7 +107,9 @@ export const HomeContent = () => {
                         <BookOpen className="h-6 w-6 text-white" />
                     </div>
                 </div>
-                <h3 className="text-2xl font-bold text-slate-900">500+</h3>
+                <h3 className="text-2xl font-bold text-slate-900">
+                    {isLoadingStats ? "..." : stats.resources > 0 ? stats.resources + "+" : "0"}
+                </h3>
                 <p className="text-sm text-slate-600 font-medium">Resources</p>
             </div>
         </div>
