@@ -23,6 +23,7 @@ import { ProfileTab } from "@/components/dashboard/ProfileTab";
 import { BlogsNewsTab } from "@/components/dashboard/BlogsNewsTab";
 import { PackagesTab } from "@/components/dashboard/PackagesTab";
 import { SupportTab } from "@/components/dashboard/SupportTab";
+import { AnnouncementsTab } from "@/components/dashboard/AnnouncementsTab";
 
 // Import Insight Tabs
 import { AllotmentsTab } from "@/components/dashboard/insights/AllotmentsTab";
@@ -38,7 +39,7 @@ interface Tab {
     label: string;
     icon: any;
     pinned: boolean;
-    type: "home" | "universities" | "university-detail" | "institutes" | "institute-detail" | "counsellings" | "counselling-detail" | "courses" | "videos" | "resources" | "allotments" | "closing-ranks" | "seat-matrix" | "fee-stipend" | "allotment-mapping" | "rank-scan" | "profile" | "blogs-news" | "packages" | "support" | "placeholder";
+    type: "home" | "universities" | "university-detail" | "institutes" | "institute-detail" | "counsellings" | "counselling-detail" | "courses" | "videos" | "resources" | "announcements" | "allotments" | "closing-ranks" | "seat-matrix" | "fee-stipend" | "allotment-mapping" | "rank-scan" | "profile" | "blogs-news" | "packages" | "support" | "placeholder";
     data?: any;
 }
 
@@ -110,6 +111,8 @@ const getTabFromSlug = (slugArr?: string[]): Tab => {
             return { id: "videos", label: "Videos", icon: PlayCircle, pinned: false, type: "videos" };
         case "resources":
             return { id: "resources", label: "Resources", icon: BookOpen, pinned: false, type: "resources" };
+        case "announcements":
+            return { id: "announcements", label: "Announcements", icon: Newspaper, pinned: false, type: "announcements" };
         case "allotments":
             return { id: "allotments", label: "Allotments", icon: GitMerge, pinned: false, type: "allotments" };
         case "closing-ranks":
@@ -287,6 +290,10 @@ export default function DashboardClient() {
 
                     {activeTab.type === "resources" && (
                         <ResourcesTab />
+                    )}
+
+                    {activeTab.type === "announcements" && (
+                        <AnnouncementsTab />
                     )}
 
                     {activeTab.type === "allotments" && <AllotmentsTab />}

@@ -1,7 +1,34 @@
-import React from "react";
+"use client";
+import React, { useState, useEffect } from "react";
+import Link from "next/link";
 import { GraduationCap, Building2, PlayCircle, BookOpen, GitMerge, Search, Trophy } from "lucide-react";
+import { getDocsAction } from "@/actions/admin-crud";
 
-export const HomeContent = () => (
+export const HomeContent = () => {
+    const [quickUpdates, setQuickUpdates] = useState<any[]>([]);
+    const [events, setEvents] = useState<any[]>([]);
+
+    useEffect(() => {
+        const fetchAnnouncements = async () => {
+            try {
+                const res = await getDocsAction({ 
+                    collection: "announcements", 
+                    query: { status: { equals: 'published' } },
+                    limit: 20 
+                });
+                if (res.success && res.data?.docs) {
+                    const all = res.data.docs;
+                    setQuickUpdates(all.filter((a: any) => a.announcement_type === 'quick').slice(0, 3));
+                    setEvents(all.filter((a: any) => a.announcement_type === 'event').slice(0, 3));
+                }
+            } catch (error) {
+                console.error("Failed to fetch announcements:", error);
+            }
+        };
+        fetchAnnouncements();
+    }, []);
+
+    return (
     <div className="p-8 max-w-7xl mx-auto space-y-8 animate-in fade-in duration-500">
         {/* Welcome Section */}
         <div>
@@ -88,30 +115,20 @@ export const HomeContent = () => (
             <div className="bg-white border-2 border-slate-300 rounded-xl p-6">
                 <div className="flex items-center justify-between mb-4">
                     <h2 className="text-lg font-bold text-slate-900">Quick Updates</h2>
-                    <span className="text-xs text-blue-600 font-medium cursor-pointer hover:underline">View All</span>
+                    <Link href="/dashboard/announcements?tab=quick" className="text-xs text-blue-600 font-medium hover:underline">View All</Link>
                 </div>
                 <div className="space-y-3">
-                    <div className="flex gap-3 p-3 rounded-lg bg-red-50 border border-red-100">
-                        <div className="h-2 w-2 rounded-full bg-red-500 mt-1.5 shrink-0" />
-                        <div>
-                            <h4 className="font-semibold text-slate-900 text-sm">NEET 2025 Round 2 Results Delayed</h4>
-                            <p className="text-xs text-slate-500 mt-1">Posted 2 hours ago</p>
+                    {quickUpdates.length > 0 ? quickUpdates.map((update, idx) => (
+                        <div key={idx} className={`flex gap-3 p-3 rounded-lg border ${idx % 3 === 0 ? 'bg-red-50 border-red-100' : idx % 3 === 1 ? 'bg-blue-50 border-blue-100' : 'bg-green-50 border-green-100'}`}>
+                            <div className={`h-2 w-2 rounded-full mt-1.5 shrink-0 ${idx % 3 === 0 ? 'bg-red-500' : idx % 3 === 1 ? 'bg-blue-500' : 'bg-green-500'}`} />
+                            <div>
+                                <h4 className="font-semibold text-slate-900 text-sm">{update.title}</h4>
+                                <p className="text-xs text-slate-500 mt-1 line-clamp-1">{update.message}</p>
+                            </div>
                         </div>
-                    </div>
-                    <div className="flex gap-3 p-3 rounded-lg bg-blue-50 border border-blue-100">
-                        <div className="h-2 w-2 rounded-full bg-blue-500 mt-1.5 shrink-0" />
-                        <div>
-                            <h4 className="font-semibold text-slate-900 text-sm">New Seat Matrix Released</h4>
-                            <p className="text-xs text-slate-500 mt-1">Posted 5 hours ago</p>
-                        </div>
-                    </div>
-                    <div className="flex gap-3 p-3 rounded-lg bg-green-50 border border-green-100">
-                        <div className="h-2 w-2 rounded-full bg-green-500 mt-1.5 shrink-0" />
-                        <div>
-                            <h4 className="font-semibold text-slate-900 text-sm">Choice Filling Extended</h4>
-                            <p className="text-xs text-slate-500 mt-1">Posted 1 day ago</p>
-                        </div>
-                    </div>
+                    )) : (
+                        <div className="text-sm text-slate-500 text-center py-4 bg-slate-50 rounded-lg border border-slate-100">No new updates</div>
+                    )}
                 </div>
             </div>
 
@@ -119,38 +136,30 @@ export const HomeContent = () => (
             <div className="bg-white border-2 border-slate-300 rounded-xl p-6">
                 <div className="flex items-center justify-between mb-4">
                     <h2 className="text-lg font-bold text-slate-900">Upcoming Events</h2>
-                    <span className="text-xs text-blue-600 font-medium cursor-pointer hover:underline">View All</span>
+                    <Link href="/dashboard/announcements?tab=event" className="text-xs text-blue-600 font-medium hover:underline">View All</Link>
                 </div>
                 <div className="space-y-3">
-                    <div className="flex gap-3 p-3 rounded-lg border border-slate-200">
-                        <div className="h-10 w-10 bg-blue-100 rounded-lg flex items-center justify-center shrink-0">
-                            <span className="text-xs font-bold text-blue-600">25<br />DEC</span>
-                        </div>
-                        <div>
-                            <h4 className="font-semibold text-slate-900 text-sm">JEE Main Counselling Webinar</h4>
-                            <p className="text-xs text-slate-500 mt-1">Tomorrow, 3:00 PM</p>
-                        </div>
-                    </div>
-                    <div className="flex gap-3 p-3 rounded-lg border border-slate-200">
-                        <div className="h-10 w-10 bg-purple-100 rounded-lg flex items-center justify-center shrink-0">
-                            <span className="text-xs font-bold text-purple-600">28<br />DEC</span>
-                        </div>
-                        <div>
-                            <h4 className="font-semibold text-slate-900 text-sm">NEET PG Round 1 Choice Filling</h4>
-                            <p className="text-xs text-slate-500 mt-1">Dec 28, 2025</p>
-                        </div>
-                    </div>
-                    <div className="flex gap-3 p-3 rounded-lg border border-slate-200">
-                        <div className="h-10 w-10 bg-green-100 rounded-lg flex items-center justify-center shrink-0">
-                            <span className="text-xs font-bold text-green-600">30<br />DEC</span>
-                        </div>
-                        <div>
-                            <h4 className="font-semibold text-slate-900 text-sm">Counselling Strategy Session</h4>
-                            <p className="text-xs text-slate-500 mt-1">Dec 30, 2025</p>
-                        </div>
-                    </div>
+                    {events.length > 0 ? events.map((ev, idx) => {
+                        const d = new Date(ev.scheduled_date || ev.createdAt);
+                        const day = d.getDate();
+                        const month = d.toLocaleString('en-US', { month: 'short' }).toUpperCase();
+                        return (
+                            <div key={idx} className="flex gap-3 p-3 rounded-lg border border-slate-200">
+                                <div className={`h-10 w-10 rounded-lg flex items-center justify-center shrink-0 ${idx % 3 === 0 ? 'bg-blue-100' : idx % 3 === 1 ? 'bg-purple-100' : 'bg-green-100'}`}>
+                                    <span className={`text-xs text-center font-bold ${idx % 3 === 0 ? 'text-blue-600' : idx % 3 === 1 ? 'text-purple-600' : 'text-green-600'}`}>{day}<br />{month}</span>
+                                </div>
+                                <div>
+                                    <h4 className="font-semibold text-slate-900 text-sm">{ev.title}</h4>
+                                    <p className="text-xs text-slate-500 mt-1 line-clamp-1">{ev.message}</p>
+                                </div>
+                            </div>
+                        );
+                    }) : (
+                        <div className="text-sm text-slate-500 text-center py-4 bg-slate-50 rounded-lg border border-slate-100">No upcoming events</div>
+                    )}
                 </div>
             </div>
         </div>
     </div>
-);
+    );
+};
