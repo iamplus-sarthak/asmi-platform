@@ -97,9 +97,6 @@ export function ResourcesTab() {
             {/* Header */}
             <div className="flex items-center gap-4">
                 <h1 className="text-3xl font-bold text-slate-900">Resources</h1>
-                <span className="text-xs font-semibold px-2.5 py-1 bg-slate-100 text-slate-600 rounded-full border border-slate-200">
-                    Database Live
-                </span>
             </div>
 
             {/* Main Area */}
