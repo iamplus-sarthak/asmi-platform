@@ -1,8 +1,8 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { Search, Bell, Settings, Gift, FileText, ChevronDown, Newspaper } from "lucide-react";
+import { Search, Bell, Settings, Gift, FileText, ChevronDown, Newspaper, Loader2, Building2, GraduationCap, LayoutDashboard } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import {
@@ -16,6 +16,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { NotificationDrawer } from "@/components/dashboard/NotificationDrawer";
 import { useAuthStore } from "@/store/useAuthStore";
 import { getStudentProfileAction } from "@/actions/profile";
+import { globalSearchAction } from "@/actions/search";
 
 export function TopNav() {
     const router = useRouter();
@@ -23,6 +24,13 @@ export function TopNav() {
     const [unreadCount, setUnreadCount] = useState(0);
     const { user } = useAuthStore();
     const [userInitial, setUserInitial] = useState("U");
+    
+    // Search State
+    const [searchQuery, setSearchQuery] = useState("");
+    const [searchResults, setSearchResults] = useState<any[]>([]);
+    const [isSearching, setIsSearching] = useState(false);
+    const [isSearchOpen, setIsSearchOpen] = useState(false);
+    const searchRef = useRef<HTMLDivElement>(null);
 
     React.useEffect(() => {
         const fetchStudentName = async () => {
@@ -43,6 +51,42 @@ export function TopNav() {
         fetchStudentName();
     }, [user]);
 
+    // Handle clicks outside of search
+    useEffect(() => {
+        const handleClickOutside = (event: MouseEvent) => {
+            if (searchRef.current && !searchRef.current.contains(event.target as Node)) {
+                setIsSearchOpen(false);
+            }
+        };
+        document.addEventListener("mousedown", handleClickOutside);
+        return () => document.removeEventListener("mousedown", handleClickOutside);
+    }, []);
+
+    // Search Debounce Effect
+    useEffect(() => {
+        const delayDebounceFn = setTimeout(async () => {
+            if (searchQuery.trim().length >= 2) {
+                setIsSearching(true);
+                try {
+                    const res = await globalSearchAction(searchQuery);
+                    if (res.success) {
+                        setSearchResults(res.data || []);
+                        setIsSearchOpen(true);
+                    }
+                } catch (error) {
+                    console.error(error);
+                } finally {
+                    setIsSearching(false);
+                }
+            } else {
+                setSearchResults([]);
+                setIsSearchOpen(false);
+            }
+        }, 300);
+
+        return () => clearTimeout(delayDebounceFn);
+    }, [searchQuery]);
+
     return (
         <div className="h-16 bg-white/80 backdrop-blur-md border-b border-slate-200 flex items-center justify-between px-6 fixed top-0 left-[260px] right-0 z-30">
 
@@ -60,12 +104,61 @@ export function TopNav() {
                     </Select>
                 </div>
 
-                <div className="relative flex-1 max-w-md">
+                <div className="relative flex-1 max-w-md" ref={searchRef}>
                     <Search className="absolute left-3 top-2.5 h-4 w-4 text-slate-400" />
                     <Input
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        onFocus={() => { if (searchQuery.length >= 2) setIsSearchOpen(true); }}
                         placeholder="Search for institutes, exams, or news..."
-                        className="pl-9 h-10 bg-slate-50 border-slate-200 focus-visible:ring-blue-500/20 focus-visible:border-blue-400 rounded-full text-sm text-slate-700 placeholder:text-slate-400"
+                        className="pl-9 pr-10 h-10 bg-slate-50 border-slate-200 focus-visible:ring-blue-500/20 focus-visible:border-blue-400 rounded-full text-sm text-slate-700 placeholder:text-slate-400"
                     />
+                    {isSearching && (
+                        <Loader2 className="absolute right-3 top-2.5 h-4 w-4 text-slate-400 animate-spin" />
+                    )}
+
+                    {/* Search Results Dropdown */}
+                    {isSearchOpen && searchQuery.length >= 2 && (
+                        <div className="absolute top-12 left-0 right-0 bg-white border border-slate-200 rounded-xl shadow-xl overflow-hidden z-50">
+                            {searchResults.length > 0 ? (
+                                <div className="max-h-[300px] overflow-y-auto py-2">
+                                    {searchResults.map((result, idx) => (
+                                        <div 
+                                            key={idx} 
+                                            onClick={() => {
+                                                setIsSearchOpen(false);
+                                                setSearchQuery("");
+                                                router.push(result.href);
+                                            }}
+                                            className="px-4 py-3 hover:bg-slate-50 cursor-pointer flex items-center gap-3 border-b border-slate-100 last:border-0 transition-colors"
+                                        >
+                                            <div className={`h-8 w-8 rounded-lg flex items-center justify-center shrink-0 ${
+                                                result.type === 'institute' ? 'bg-green-100 text-green-600' :
+                                                result.type === 'counselling' ? 'bg-blue-100 text-blue-600' :
+                                                result.type === 'page' ? 'bg-purple-100 text-purple-600' :
+                                                'bg-amber-100 text-amber-600'
+                                            }`}>
+                                                {result.type === 'institute' && <Building2 className="h-4 w-4" />}
+                                                {result.type === 'counselling' && <GraduationCap className="h-4 w-4" />}
+                                                {result.type === 'announcement' && <Newspaper className="h-4 w-4" />}
+                                                {result.type === 'page' && <LayoutDashboard className="h-4 w-4" />}
+                                            </div>
+                                            <div>
+                                                <h4 className="text-sm font-semibold text-slate-900 line-clamp-1">{result.title}</h4>
+                                                <p className="text-xs text-slate-500 capitalize">{result.subtitle}</p>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            ) : (
+                                !isSearching && (
+                                    <div className="p-4 text-center text-sm text-slate-500">
+                                        No results found for "{searchQuery}"
+                                    </div>
+                                )
+                            )}
+                        </div>
+                    )}
                 </div>
             </div>
 
